@@ -1,0 +1,13 @@
+"""Konstanten für die PowerGroupMonitor Integration.
+
+Attributes:
+    DOMAIN (str): Der Domain-Name der Integration, wird als eindeutiger Namespace
+        in Home Assistant verwendet.
+"""
+
+DOMAIN = "power_group_monitor"
+
+DEVICE_INFO = {
+    "manufacturer": "mephdrac",
+    "model": "Power - Monitor",
+}

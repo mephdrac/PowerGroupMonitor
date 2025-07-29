@@ -1,0 +1,195 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect MaxxiCharge",
+        "description": "Configure your MaxxiCharge connection.",
+        "data": {
+          "only_accept_one_ip": "Limit webhook access?",
+          "webhook_id": "Webhook ID",
+          "name": "Device name",
+          "ip_address": "IP-Adress",
+          "notify_migration": "Detect migration sensors?"
+        }
+      },
+      "reconfigure": {
+      "title": "Reconfigure MaxxiCharge",
+      "description": "Change options.",
+      "data": {
+        "only_accept_one_ip": "Limit webhook access?",
+        "webhook_id": "Webhook ID",
+        "ip_address": "IP-Adress",
+        "notify_migration": "Detect migration sensors?"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_power": {
+        "name": "Battery Power"
+      },
+      "rssi": {
+        "name": "rssi"
+      },
+      "device_id":{
+        "name": "Device ID"
+      },
+      "PvPower":{
+        "name": "PV Power"
+      },
+      "BatterySoc":{
+        "name": "Battery SOC"
+      },
+      "BatteryPowerCharge":{
+        "name": "Battery Power Charge"
+      },
+      "BatteryPowerDischarge":{
+        "name": "Battery Power Discharge"
+      },
+      "CcuPower":{
+        "name": "CCU Power"
+      },
+      "GridExport":{
+        "name": "Grid Export Power"
+      },
+      "GridImport":{
+        "name": "Grid Import Power"
+      },
+      "PowerConsumption":{
+        "name": "House Consumption"
+      },
+      "ConsumptionEnergyToday":{
+        "name": "House Consumption today"
+      },
+      "ConsumptionEnergyTotal":{
+        "name": "House Consumption total"
+      },
+      "PvSelfConsumption":{
+        "name": "PV Self Consumption"
+      },
+      "PowerMeter":{
+        "name": "Power meter"
+      },
+      "BatterySoE":{
+        "name": "Battery SoE"
+      },
+      "BatterySoESensor":{
+        "name": "Battery ({index}) SoE"
+      },
+      "APIRoute":{
+        "name": "API-Route"
+      },
+      "LocalServer":{
+        "name": "Use Local Server"
+      },
+      "Cloudservice":{
+        "name": "Cloudservice"
+      },
+      "DC/DC-Algorithmus":{
+        "name": "DC/DC algorithm"
+      },
+      "PowerMeterIp":{
+        "name": "Power meter IP"
+      },
+      "PowerMeterType":{
+        "name": "Power meter type"
+      },
+      "MaximumPower":{
+        "name": "Maximum power"
+      },
+      "OfflineOutputPower":{
+        "name": "Offline output power"
+      },
+      "NumberOfBatteries":{
+        "name": "Number of batteries"
+      },
+      "OutputOffset":{
+        "name": "Output offset"
+      },
+      "CcuSpeed":{
+        "name": "CCU Speed"
+      },
+      "Microinverter":{
+        "name": "Microinverter"
+      },
+      "ResponseTolerance":{
+        "name": "Response tolerance"
+      },
+       "MinimumBatteryDischarge":{
+        "name": "Minimum Battery Discharge"
+      },
+       "MaximumBatteryCharge":{
+        "name": "Maximum Battery Charge"
+      },
+      "FirmwareVersion":{
+        "name": "Firmware version"
+      },
+      "WebhookId":{
+        "name": "Webhook ID"
+      },
+      "BatteryTotalEnergyCharge": {
+        "name": "Battery Charge Total"
+      },
+      "BatteryTotalEnergyDischarge": {
+        "name": "Battery Discharge Total"
+      },
+      "BatteryTodayEnergyCharge": {
+        "name": "Battery Charge Today"
+      },
+      "BatteryTodayEnergyDischarge": {
+        "name": "Battery Discharge Today"
+      },
+      "CcuEnergyToday": {
+        "name": "CCU Energy Today"
+      },
+      "CcuEnergyTotal": {
+        "name": "CCU Energy Total"
+      },
+      "GridImportEnergyToday": {
+        "name": "Grid Import Today"
+      },
+      "GridImportEnergyTotal": {
+        "name": "Grid Import Energy Total"
+      },
+      "GridExportEnergyToday": {
+        "name": "Grid Export Energy Today"
+      },
+      "GridExportEnergyTotal": {
+        "name": "Grid Export Energy Total"
+      },
+      "PvSelfConsumptionEnergyToday": {
+        "name": "PV Self Cons. Today"
+      },
+      "PvSelfConsumptionEnergyTotal": {
+        "name": "PV Self Cons. Total"
+      },
+      "PvTodayEnergy": {
+        "name": "PV Energy Today"
+      },
+      "PvTotalEnergy": {
+        "name": "PV Energy Total"
+      }
+    },
+    "number": {
+      "maxOutputPower": {
+        "name": "Maximum power"
+      },
+      "offlinePower":{
+        "name": "Offline output power"
+      },
+      "max_soc":{
+        "name": "Maximum SOC"
+      },
+      "min_soc":{
+        "name": "Minimum SOC"
+      },
+      "baseLoad":{
+        "name": "Output offset"
+      },
+      "threshold":{
+        "name": "Response tolerance"
+      }
+    }
+  }
+}

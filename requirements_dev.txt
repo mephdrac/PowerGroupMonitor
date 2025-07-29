@@ -1,0 +1,7 @@
+pylint
+pylint-per-file-ignores
+
+voluptuous
+#beautifulsoup4==4.12.3
+#types-beautifulsoup4
+homeassistant>=2025.1.0
