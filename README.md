@@ -19,7 +19,7 @@
 ---
 
 ## ⚠️ Limitationen:
-
+ **PowerGroupMonitor** ist noch nicht einsatzfähig. Diese Version ist nur die Intial-Version. Sie hat noch keinerlei Funktionalität.
 ---
 
 ## Warum PowerGroupMonitor?
