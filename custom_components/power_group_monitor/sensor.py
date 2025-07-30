@@ -18,6 +18,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .devices.rssi import Rssi
+
 #from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,13 +41,11 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
 
     """
 
-    
-#    sensor = DeviceId(entry)
-    
-#    async_add_entities(
-#   [
-#           sensor,
-    
-#]
-#)
+    sensor = Rssi(entry)
+
+    async_add_entities(
+        [
+           sensor,
+        ]
+    )
 #    await asyncio.sleep(0)

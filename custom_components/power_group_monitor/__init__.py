@@ -53,8 +53,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {}
-    
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "number"])
+
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
 
@@ -89,7 +89,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     _LOGGER.info("Migration auf Version 1 abgeschlossen")
 
     return True
-    
 
 # async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
 #     # pylint: disable=unused-argument
@@ -121,8 +120,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         True, wenn das Entladen erfolgreich war.
 
     """
-    await async_unregister_webhook(hass, entry)
-
     unload_ok = all(
         await asyncio.gather(
             *[
