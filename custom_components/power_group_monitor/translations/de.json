@@ -20,9 +20,9 @@
     }
   },
   "entity": {
-    "sensor": {      
-      "rssi": {
-        "name": "WiFi Signalstärke"
+    "sensor": {            
+      "PowerSensor":{
+        "name": "{index} - Leistung"
       }
     }    
   }
