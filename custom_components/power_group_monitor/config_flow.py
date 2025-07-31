@@ -25,7 +25,7 @@ from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
-from .const import CONF_GROUPS, CONF_GROUP_NAME, DOMAIN
+from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,10 +77,10 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_add_group(self, user_input=None):
         if user_input is not None:
             group_name = user_input[CONF_GROUP_NAME]
-            entities = user_input["entities"]
+            entities = user_input[CONF_GROUP_ENTITIES]
             self._groups.append({
                 CONF_GROUP_NAME: group_name,
-                "entities": entities,
+                CONF_GROUP_ENTITIES: entities,
             })
             return await self.async_step_group_menu()
 
@@ -88,7 +88,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="add_group",
             data_schema=vol.Schema({
                 vol.Required(CONF_GROUP_NAME): str,
-                vol.Required("entities"): selector({
+                vol.Required(CONF_GROUP_ENTITIES): selector({
                     "entity": {
                         "multiple": True,
                         "filter": [
@@ -115,8 +115,8 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=self._name,
                     data={
-                        "name": self._name,
-                        "groups": self._groups,
+                        CONF_NAME: self._name,
+                        CONF_GROUPS: self._groups,
                     },
                 )
 
@@ -137,8 +137,8 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             new_groups = []
             for i in range(len(current_groups)):
                 name = user_input.get(f"{CONF_GROUP_NAME}_{i}")
-                entities = user_input.get(f"group_entities_{i}", [])
-                new_groups.append({CONF_GROUP_NAME: name, "entities": entities})
+                entities = user_input.get(f"group_{CONF_GROUP_ENTITIES}_{i}", [])
+                new_groups.append({CONF_GROUP_NAME: name, CONF_GROUP_ENTITIES: entities})
 
             return self.async_update_reload_and_abort(
                 entry,
@@ -150,8 +150,8 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         for i, group in enumerate(current_groups):
             schema_fields[vol.Required(f"{CONF_GROUP_NAME}_{i}", default=group[CONF_GROUP_NAME])] = str
             schema_fields[vol.Required(
-                f"group_entities_{i}",
-                default=group.get("entities", []),
+                f"group_{CONF_GROUP_ENTITIES}_{i}",
+                default=group.get(CONF_GROUP_ENTITIES, []),
             )] = selector({
                 "entity": {
                     "multiple": True,
