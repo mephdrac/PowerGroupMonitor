@@ -25,7 +25,7 @@ from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
-from .const import CONF_GROUPS, DOMAIN
+from .const import CONF_GROUPS, CONF_GROUP_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,10 +76,10 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_add_group(self, user_input=None):
         if user_input is not None:
-            group_name = user_input["group_name"]
+            group_name = user_input[CONF_GROUP_NAME]
             entities = user_input["entities"]
             self._groups.append({
-                "group_name": group_name,
+                CONF_GROUP_NAME: group_name,
                 "entities": entities,
             })
             return await self.async_step_group_menu()
@@ -87,7 +87,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="add_group",
             data_schema=vol.Schema({
-                vol.Required("group_name"): str,
+                vol.Required(CONF_GROUP_NAME): str,
                 vol.Required("entities"): selector({
                     "entity": {
                         "multiple": True,
@@ -136,9 +136,9 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Update speichern
             new_groups = []
             for i in range(len(current_groups)):
-                name = user_input.get(f"group_name_{i}")
+                name = user_input.get(f"{CONF_GROUP_NAME}_{i}")
                 entities = user_input.get(f"group_entities_{i}", [])
-                new_groups.append({"group_name": name, "entities": entities})
+                new_groups.append({CONF_GROUP_NAME: name, "entities": entities})
 
             return self.async_update_reload_and_abort(
                 entry,
@@ -148,7 +148,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Dynamisches Schema aus bestehender Gruppenanzahl aufbauen
         schema_fields = {}
         for i, group in enumerate(current_groups):
-            schema_fields[vol.Required(f"group_name_{i}", default=group["group_name"])] = str
+            schema_fields[vol.Required(f"{CONF_GROUP_NAME}_{i}", default=group[CONF_GROUP_NAME])] = str
             schema_fields[vol.Required(
                 f"group_entities_{i}",
                 default=group.get("entities", []),
