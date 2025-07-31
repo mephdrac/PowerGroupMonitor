@@ -110,7 +110,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Entlädt die Integration vollständig und deregistriert den Webhook.
+    """Entlädt die Integration vollständig.
 
     Args:
         hass: Die Home Assistant-Instanz.
@@ -120,16 +120,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         True, wenn das Entladen erfolgreich war.
 
     """
-    unload_ok = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in ("sensor")
-            ]
-        )
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
 
-    # unload_ok = await hass.config_entries.async_forward_entry_unload(entry, "sensor")
-    # if unload_ok:
-    #     hass.data[DOMAIN].pop(entry.entry_id, None)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+
     return unload_ok

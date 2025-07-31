@@ -17,6 +17,7 @@ aufgerufen, wenn der Nutzer die Integration hinzufügt oder neu konfiguriert.
 """
 import logging
 import voluptuous as vol
+from typing import Any
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_ENTITIES
@@ -90,9 +91,45 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             last_step=True
         )
+    
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
+        """Flow-Schritt für die Neukonfiguration eines bestehenden Eintrags."""
+
+        entry = self._get_reconfigure_entry()
+        current_data = entry.data
+
+        if user_input is not None:
+            new_data = {
+                CONF_ENTITIES: user_input[CONF_ENTITIES],
+            }
+
+            self._abort_if_unique_id_mismatch()
+
+            return self.async_update_reload_and_abort(
+                entry,
+                data_updates=new_data,
+            )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_ENTITIES,
+                    default=current_data.get(CONF_ENTITIES, []),  # << aktuelle Entitäten als Default
+                ): selector({
+                    "entity": {
+                        "multiple": True,
+                        "filter": [
+                            {"domain": "switch"},
+                            {"domain": "sensor"},
+                            {"domain": "light"}
+                        ],
+                        "device_class": "power"
+                    }
+                })
+            }),
+        )
 
     def is_matching(self, other: config_entries.ConfigFlow) -> bool:
         """Vergleicht, ob dieser Flow einem bestehenden Flow entspricht."""
-        if not isinstance(other, PowerGroupMonitorConfigFlow):
-            return False
-        return self._name == other._name
+        return isinstance(other, PowerGroupMonitorConfigFlow)
