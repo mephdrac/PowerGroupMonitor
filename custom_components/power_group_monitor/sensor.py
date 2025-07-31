@@ -20,8 +20,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .sensors.power_sensor import PowerSensor
 from .sensors.power_peak_sensor import PowerPeakSensor
+from .sensors.power_standby_sensor import PowerStandbySensor
 
-from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES
+from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,14 +46,23 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     data = entry.data
     groups = data.get("groups", [])
 
-    power_sensors = []
-    power_peak_sensors = []
+    entity_list = []
 
     for group in groups:
         group_name = group[CONF_GROUP_NAME]
+        standby_threshold = group[CONF_GROUP_STANDBY]
         entities = group[CONF_GROUP_ENTITIES]
-        power_sensors.append(PowerSensor(entry, group_name, entities))
-        power_peak_sensors.append(PowerPeakSensor(entry, group_name, entities))
 
-    async_add_entities(power_sensors, update_before_add=True)
-    async_add_entities(power_peak_sensors, update_before_add=True)
+        power_sensor = PowerSensor(entry, group_name, entities)
+        power_peak_sensor = PowerPeakSensor(entry, group_name, entities)
+
+        standby_sensor = PowerStandbySensor(
+            entry,
+            group_name,
+            power_sensor,  # ← auf den dynamischen ID-Zugriff achten
+            standby_threshold=float(standby_threshold),  # konfigurierbarer Wert?
+        )
+
+        entity_list.extend([power_sensor, power_peak_sensor, standby_sensor])
+
+    async_add_entities(entity_list, update_before_add=True)

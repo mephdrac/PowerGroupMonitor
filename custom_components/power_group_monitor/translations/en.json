@@ -13,6 +13,7 @@
         "description": "Create a group, e.g. kitchen or living room",
         "data": {                    
           "group_name": "Name of group",
+          "standby": "standby",
           "entities": "Entities of group"
         }
       },
@@ -27,6 +28,7 @@
         "description": "Create a monitor group",
         "data": {          
           "name": "Name of device",
+          "standby": "standby",
           "entities": "Power-entity"
         }
       }
@@ -39,6 +41,9 @@
       },
       "PowerPeakSensor":{
         "name": "{index} - Max. Power today"
+      },
+      "PowerStandbySensor":{
+        "name": "{index} - Standby"
       }
     }    
   }

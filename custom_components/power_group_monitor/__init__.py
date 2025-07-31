@@ -10,13 +10,12 @@ Funktionen:
 - async_migrate_entry: Platzhalter für zukünftige Migrationslogik.
 """
 
-import asyncio
 import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_GROUP_STANDBY, CONF_GROUPS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,6 +75,20 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
     _LOGGER.info("Prüfe Migration: Aktuelle Version: %s.%s", version, minor_version)
 
+    if version == 1 and minor_version == 1:
+        _LOGGER.warning("Migration PowerGroupMonitor v1.0 → v1.1 gestartet")
+
+        data = dict(config_entry.data)
+        modified = False
+
+        for group in data.get(CONF_GROUPS, []):
+            if CONF_GROUP_STANDBY not in group:
+                group[CONF_GROUP_STANDBY] = "0"
+                modified = True
+
+        if modified:
+            hass.config_entries.async_update_entry(config_entry, data=data)
+
     # if version < 2:
     #     _LOGGER.info("Migration MaxxiChargeConnect v1 → v2 gestartet")
     #     new_data = {**config_entry.data}
@@ -83,10 +96,10 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     #     hass.config_entries.async_update_entry(
     #         config_entry, data=new_data, version=version
     #     )
-
     version = 1
+    minor_version = 1
     hass.config_entries.async_update_entry(config_entry, version=version)
-    _LOGGER.info("Migration auf Version 1 abgeschlossen")
+    _LOGGER.info("Migration auf Version 1.1 abgeschlossen")
 
     return True
 
