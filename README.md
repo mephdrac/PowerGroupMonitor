@@ -11,13 +11,13 @@
 
 - Gerätegruppen anlegen: Definiere Gruppen (z. B. Küche, Büro, Wärmeerzeuger), die beliebige Energie- oder Leistungs-Sensoren enthalten.
 - Aggregierte Verbrauchswerte: Erhalte Echtzeit-Daten zu Gesamtleistung (Watt) pro Gruppe
+- Kompatibilität: Funktioniert herstellerunabhängig, z. B. mit Shelly, Tasmota, Zigbee, Tuya und anderen Geräten.
 
 ## ⚠️  Funktionen (geplant - noch nicht implementiert)
 
 - Aggregierte Verbrauchswerte: Erhalte den Energieverbrauch (kWh) pro Gruppe.
 - Tägliche und monatliche Statistik: Überblick über Verbrauchshistorie direkt in Home Assistant.
 - KPIs & Analysen: Standby-Anteile, Spitzenlasten, Betriebsdauer und weitere nützliche Kennzahlen.
-- Kompatibilität: Funktioniert herstellerunabhängig, z. B. mit Shelly, Tasmota, Zigbee, Tuya und anderen Geräten.
 - Integration ins Energy Dashboard: Die gruppierten Sensoren lassen sich direkt im Home Assistant Energy Dashboard verwenden.
 
 ---
