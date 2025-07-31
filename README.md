@@ -27,10 +27,10 @@
 
 Ein Sensor, der:
 
-den aktuellen Gesamtverbrauch der Gruppe beobachtet (PowerSensor),
-prüft, ob er unter einem konfigurierten Schwellenwert liegt,
-on bedeutet: alles im Standby,
-off bedeutet: mindestens ein Gerät verbraucht mehr als nur Standby.
+- den aktuellen Gesamtverbrauch der Gruppe beobachtet (PowerSensor),
+- prüft, ob er unter einem konfigurierten Schwellenwert liegt,
+- on bedeutet: alles im Standby,
+- off bedeutet: mindestens ein Gerät verbraucht mehr als nur Standby.
 ---
 
 ## ⚠️ Limitationen:
