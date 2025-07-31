@@ -16,8 +16,8 @@ aufgerufen, wenn der Nutzer die Integration hinzufügt oder neu konfiguriert.
 
 """
 import logging
-import voluptuous as vol
 from typing import Any
+import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
@@ -25,7 +25,8 @@ from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
-from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, CONF_NEXT_STEP, DOMAIN
+from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, CONF_GROUP_STANDBY, \
+    CONF_NEXT_STEP, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """
 
     VERSION = 1
-    MINOR_VERSION = 1
+    MINOR_VERSION = 2
     reconfigure_supported = True  # <- Aktiviert den Reconfigure-Flow
 
     def __init__(self):
@@ -75,11 +76,14 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_add_group(self, user_input=None):
+        """Ein Gruppe hinzufügen"""
         if user_input is not None:
             group_name = user_input[CONF_GROUP_NAME]
+            standby = user_input[CONF_GROUP_STANDBY]
             entities = user_input[CONF_GROUP_ENTITIES]
             self._groups.append({
                 CONF_GROUP_NAME: group_name,
+                CONF_GROUP_STANDBY: standby,
                 CONF_GROUP_ENTITIES: entities,
             })
             return await self.async_step_group_menu()
@@ -88,6 +92,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="add_group",
             data_schema=vol.Schema({
                 vol.Required(CONF_GROUP_NAME): str,
+                vol.Required(CONF_GROUP_STANDBY): str,
                 vol.Required(CONF_GROUP_ENTITIES): selector({
                     "entity": {
                         "multiple": True,
@@ -101,8 +106,9 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }),
             }),
         )
-    
+
     async def async_step_group_menu(self, user_input=None):
+        """Fragemenü, ob es noch weitere Gruppen geben soll."""
         options = {
             "add_another": "Weitere Gruppe hinzufügen",
             "finish": "Fertig"
@@ -111,22 +117,22 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             if user_input[CONF_NEXT_STEP] == "add_another":
                 return await self.async_step_add_group()
-            else:
-                return self.async_create_entry(
-                    title=self._name,
-                    data={
-                        CONF_NAME: self._name,
-                        CONF_GROUPS: self._groups,
-                    },
-                )
 
+            return self.async_create_entry(
+                title=self._name,
+                data={
+                    CONF_NAME: self._name,
+                    CONF_GROUPS: self._groups,
+                },
+            )
         return self.async_show_form(
             step_id="group_menu",
             data_schema=vol.Schema({
                 vol.Required(CONF_NEXT_STEP, default="add_another"): vol.In(options)
             })
         )
-    
+
+    # pylint: disable=line-too-long
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
         """Flow-Schritt für die Neukonfiguration eines bestehenden Eintrags."""
         entry = self._get_reconfigure_entry()
@@ -137,8 +143,9 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             new_groups = []
             for i in range(len(current_groups)):
                 name = user_input.get(f"{CONF_GROUP_NAME}_{i}")
+                standby = user_input.get(f"{CONF_GROUP_STANDBY}_{i}")
                 entities = user_input.get(f"group_{CONF_GROUP_ENTITIES}_{i}", [])
-                new_groups.append({CONF_GROUP_NAME: name, CONF_GROUP_ENTITIES: entities})
+                new_groups.append({CONF_GROUP_NAME: name, CONF_GROUP_STANDBY: standby, CONF_GROUP_ENTITIES: entities})
 
             return self.async_update_reload_and_abort(
                 entry,
@@ -149,6 +156,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema_fields = {}
         for i, group in enumerate(current_groups):
             schema_fields[vol.Required(f"{CONF_GROUP_NAME}_{i}", default=group[CONF_GROUP_NAME])] = str
+            schema_fields[vol.Required(f"{CONF_GROUP_STANDBY}_{i}", default=group[CONF_GROUP_STANDBY])] = str
             schema_fields[vol.Required(
                 f"group_{CONF_GROUP_ENTITIES}_{i}",
                 default=group.get(CONF_GROUP_ENTITIES, []),
