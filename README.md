@@ -11,7 +11,7 @@
 
 - Gerätegruppen anlegen: Definiere Gruppen (z. B. Küche, Büro, Wärmeerzeuger), die beliebige Energie- oder Leistungs-Sensoren enthalten.
 - Aggregierte Verbrauchswerte: Erhalte Echtzeit-Daten zu Gesamtleistung (Watt) pro Gruppe
-- 
+
 ## ⚠️  Funktionen (geplant - noch nicht implementiert)
 
 - Aggregierte Verbrauchswerte: Erhalte den Energieverbrauch (kWh) pro Gruppe.
