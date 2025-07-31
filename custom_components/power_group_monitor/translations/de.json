@@ -2,194 +2,41 @@
   "config": {
     "step": {
       "user": {
-        "title": "MaxxiCharge verbinden",
-        "description": "Richte deine MaxxiCharge-Verbindung ein.",
-        "data": {
-          "only_accept_one_ip": "Webhook-Zugriff einschränken?",
-          "webhook_id": "Webhook-ID",
-          "name": "Name des Gerätes",
-          "ip_address": "IP-Adresse der MaxxiCharge",
-          "notify_migration": "Migrations-Sensoren erkennen?"
+        "title": "Power-Group-Monitor",
+        "description": "PowerGroupMonitor konfigurieren.",
+        "data": {                    
+          "name": "Name des Gerätes"          
+        }
+      },
+       "add_group": {
+        "title": "Power-Group-Monitor",
+        "description": "Erstellen einer Gruppe, z.B. Küche oder Wohnzimmer",
+        "data": {                    
+          "group_name": "Name der Gruppe",
+          "entities": "Entitäten der Gruppe"
+        }
+      },
+      "group_menu": {
+        "title": "Power-Group-Monitor",        
+        "data": {                    
+          "next_step": "Soll ein weitere Gruppe eingerichtet werden?"
         }
       },
       "reconfigure": {
-        "title": "MaxxiCharge neu konfigurieren",
-        "description": "Rekonfguriere deine MaxxiCharge-Verbindung.",
-        "data": {
-          "only_accept_one_ip": "Webhook-Zugriff einschränken?",
-          "webhook_id": "Webhook-ID",
-          "ip_address": "IP-Adresse der MaxxiCharge",
-          "notify_migration": "Migrations-Sensoren erkennen?"
+        "title": "Monitor Gruppe erstellen",
+        "description": "Richte eine Gruppe ein.",
+        "data": {          
+          "name": "Name des Gerätes",
+          "entities": "Power-Entität"
         }
       }
     }
   },
   "entity": {
-    "sensor": {
-      "battery_power": {
-        "name": "Batterie Leistung"
-      },
-      "rssi": {
-        "name": "WiFi Signalstärke"
-      },
-      "device_id":{
-        "name": "Gerätenummer"
-      },
-      "PvPower":{
-        "name": "PV Leistung"
-      },
-      "BatterySoc":{
-        "name": "Batterie Ladestand"
-      },
-      "BatteryPowerCharge":{
-        "name": "Batterie Ladeleistung"
-      },
-      "BatteryPowerDischarge":{
-        "name": "Batterie Entladeleistung"
-      },
-      "CcuPower":{
-        "name": "CCU Leistung"
-      },
-      "GridExport":{
-        "name": "Netzeinspeisung"
-      },
-      "GridImport":{
-        "name": "Netzbezug"
-      },
-      "PowerConsumption":{
-        "name": "Hausverbrauch"
-      },
-      "ConsumptionEnergyToday":{
-        "name": "Hausverbrauch heute"
-      },
-      "ConsumptionEnergyTotal":{
-        "name": "Hausverbrauch gesamt"
-      },
-      "PvSelfConsumption":{
-        "name": "PV Eigenverbrauch"
-      },
-      "PowerMeter":{
-        "name": "Stromzähler"
-      },
-      "BatterySoE":{
-        "name": "Batterie Kapazität"
-      },
-      "BatterySoESensor":{
-        "name": "Batterie ({index}) Kapazität"
-      },
-      "APIRoute":{
-        "name": "API-Route"
-      },
-      "LocalServer":{
-        "name": "Nutze lokalen Server"
-      },
-      "Cloudservice":{
-        "name": "Cloudservice aktiv"
-      },
-      "DC/DC-Algorithmus":{
-        "name": "DC/DC-Algorithmus"
-      },
-      "PowerMeterIp":{
-        "name": "Messgerät IP"
-      },
-      "PowerMeterType":{
-        "name": "Messgerät Typ"
-      },
-      "MaximumPower":{
-        "name": "Maximale Leistung"
-      },
-      "OfflineOutputPower":{
-        "name": "Offline-Ausgangsleistung"
-      },
-      "NumberOfBatteries":{
-        "name": "Batterien im System"
-      },
-      "OutputOffset":{
-        "name": "Ausgabe korrigieren"
-      },
-      "CcuSpeed":{
-        "name": "CCU-Geschwindigkeit"
-      },
-      "Microinverter":{
-        "name": "Mikro-Wechselrichter-Typ"
-      },
-      "ResponseTolerance":{
-        "name": "Reaktionstoleranz"
-      },
-       "MinimumBatteryDischarge":{
-        "name": "Minimale Entladung der Batterie"
-      },
-       "MaximumBatteryCharge":{
-        "name": "Maximale Akkuladung"
-      },
-      "FirmwareVersion":{
-        "name": "Firmware Version"
-      },
-      "WebhookId":{
-        "name": "Webhook ID"
-      },
-      "BatteryTotalEnergyCharge": {
-        "name": "Batterie Laden gesamt"
-      },
-      "BatteryTotalEnergyDischarge": {
-        "name":  "Batterie Entladen gesamt"
-      },
-      "BatteryTodayEnergyCharge": {
-        "name":  "Batterie Laden heute"
-      },
-      "BatteryTodayEnergyDischarge": {
-        "name": "Batterie Entladen heute"
-      },
-      "CcuEnergyToday":  {
-        "name": "CCU Energie heute"
-      },
-      "CcuEnergyTotal": {
-        "name": "CCU Energie gesamt"
-      },
-      "GridImportEnergyToday": {
-        "name": "Netzbezug heute"
-      },
-      "GridImportEnergyTotal": {
-        "name": "Netzbezug gesamt"
-      },
-      "GridExportEnergyToday": {
-        "name": "Netzeinspeisung heute"
-      },
-      "GridExportEnergyTotal": {
-        "name": "Netzeinspeisung gesamt"
-      },
-      "PvSelfConsumptionEnergyToday": {
-        "name": "PV Eigenverbrauch heute"
-      },
-      "PvSelfConsumptionEnergyTotal":  {
-        "name": "PV Eigenverbrauch gesamt"
-      },
-      "PvTodayEnergy": {
-        "name": "PV Produktion heute"
-      },
-      "PvTotalEnergy": {
-        "name": "PV Produktion gesamt"
+    "sensor": {            
+      "PowerSensor":{
+        "name": "{index} - Leistung"
       }
-    },
-    "number": {
-      "maxOutputPower": {
-        "name": "Maximale Leistung"
-      },
-      "offlinePower":{
-        "name": "Offline-Ausgangsleistung"
-      },
-      "max_soc":{
-        "name": "Maximale Akkuladung"
-      },
-      "min_soc":{
-        "name": "Minimale Entladung der Batterie"
-      },
-      "baseLoad":{
-        "name": "Ausgabe korrigieren"
-      },
-      "threshold":{
-        "name": "Reaktionstoleranz"
-      }
-    }
+    }    
   }
 }

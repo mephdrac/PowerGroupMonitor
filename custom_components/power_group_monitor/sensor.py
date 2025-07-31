@@ -18,7 +18,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .devices.rssi import Rssi
+from .sensors.power_sensor import PowerSensor
+from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES
 
 #from .const import DOMAIN
 
@@ -41,11 +42,25 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
 
     """
 
-    sensor = Rssi(entry)
+    data = entry.data
+    groups = data.get("groups", [])
 
-    async_add_entities(
-        [
-           sensor,
-        ]
-    )
+    sensors = []
+    for group in groups:
+        group_name = group[CONF_GROUP_NAME]        
+        entities = group[CONF_GROUP_ENTITIES]
+        sensors.append(PowerSensor(entry, group_name, entities))
+
+    async_add_entities(sensors, update_before_add=True)
+   
+    
+
+
+    # power_sensor = PowerSensor(entry)
+
+    # async_add_entities(
+    #     [
+    #        power_sensor,
+    #     ]
+    # )
 #    await asyncio.sleep(0)
