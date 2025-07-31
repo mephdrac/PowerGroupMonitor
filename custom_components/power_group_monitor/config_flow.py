@@ -16,8 +16,8 @@ aufgerufen, wenn der Nutzer die Integration hinzufügt oder neu konfiguriert.
 
 """
 import logging
-import voluptuous as vol
 from typing import Any
+import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
@@ -75,6 +75,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_add_group(self, user_input=None):
+        """Ein Gruppe hinzufügen"""
         if user_input is not None:
             group_name = user_input[CONF_GROUP_NAME]
             entities = user_input[CONF_GROUP_ENTITIES]
@@ -101,8 +102,9 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }),
             }),
         )
-    
+
     async def async_step_group_menu(self, user_input=None):
+        """Fragemenü, ob es noch weitere Gruppen geben soll."""
         options = {
             "add_another": "Weitere Gruppe hinzufügen",
             "finish": "Fertig"
@@ -111,22 +113,22 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             if user_input[CONF_NEXT_STEP] == "add_another":
                 return await self.async_step_add_group()
-            else:
-                return self.async_create_entry(
-                    title=self._name,
-                    data={
-                        CONF_NAME: self._name,
-                        CONF_GROUPS: self._groups,
-                    },
-                )
 
+            return self.async_create_entry(
+                title=self._name,
+                data={
+                    CONF_NAME: self._name,
+                    CONF_GROUPS: self._groups,
+                },
+            )
         return self.async_show_form(
             step_id="group_menu",
             data_schema=vol.Schema({
                 vol.Required(CONF_NEXT_STEP, default="add_another"): vol.In(options)
             })
         )
-    
+
+    # pylint: disable=line-too-long
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
         """Flow-Schritt für die Neukonfiguration eines bestehenden Eintrags."""
         entry = self._get_reconfigure_entry()

@@ -36,6 +36,9 @@
     "sensor": {            
       "PowerSensor":{
         "name": "{index} - Leistung"
+      },
+      "PowerPeakSensor":{
+        "name": "{index} - Max. Leistung heute"
       }
     }    
   }
