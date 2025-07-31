@@ -2,11 +2,18 @@
   "config": {
     "step": {
       "user": {
-        "title": "Monitor Gruppe erstellen",
-        "description": "Richte eine Gruppe ein.",
+        "title": "Power-Group-Monitor",
+        "description": "PowerGroupMonitor konfigurieren.",
         "data": {                    
-          "name": "Name des Gerätes",
-          "entities": "Power-Entität"
+          "name": "Name des Gerätes"          
+        }
+      },
+       "add_group": {
+        "title": "Gruppe erstellen",
+        "description": "Einrichten der Gruppe, z.B. Küche oder Wohnzimmer",
+        "data": {                    
+          "group_name": "Name der Gruppe",
+          "entities": "Entitäten der Gruppe"
         }
       },
       "reconfigure": {
