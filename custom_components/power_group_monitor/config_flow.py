@@ -20,12 +20,12 @@ import voluptuous as vol
 from typing import Any
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_NAME, CONF_ENTITIES
+from homeassistant.const import CONF_NAME
 from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
-from .const import DOMAIN
+from .const import CONF_GROUPS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -129,40 +129,44 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
         """Flow-Schritt für die Neukonfiguration eines bestehenden Eintrags."""
-
         entry = self._get_reconfigure_entry()
-        current_data = entry.data
+        current_groups = entry.data.get(CONF_GROUPS, [])
 
         if user_input is not None:
-            new_data = {
-                CONF_ENTITIES: user_input[CONF_ENTITIES],
-            }
-
-            self._abort_if_unique_id_mismatch()
+            # Update speichern
+            new_groups = []
+            for i in range(len(current_groups)):
+                name = user_input.get(f"group_name_{i}")
+                entities = user_input.get(f"group_entities_{i}", [])
+                new_groups.append({"group_name": name, "entities": entities})
 
             return self.async_update_reload_and_abort(
                 entry,
-                data_updates=new_data,
+                data_updates={CONF_GROUPS: new_groups}
             )
+
+        # Dynamisches Schema aus bestehender Gruppenanzahl aufbauen
+        schema_fields = {}
+        for i, group in enumerate(current_groups):
+            schema_fields[vol.Required(f"group_name_{i}", default=group["group_name"])] = str
+            schema_fields[vol.Required(
+                f"group_entities_{i}",
+                default=group.get("entities", []),
+            )] = selector({
+                "entity": {
+                    "multiple": True,
+                    "filter": [
+                        {"domain": "switch"},
+                        {"domain": "sensor"},
+                        {"domain": "light"}
+                    ],
+                    "device_class": "power"
+                }
+            })
 
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=vol.Schema({
-                vol.Required(
-                    CONF_ENTITIES,
-                    default=current_data.get(CONF_ENTITIES, []),  # << aktuelle Entitäten als Default
-                ): selector({
-                    "entity": {
-                        "multiple": True,
-                        "filter": [
-                            {"domain": "switch"},
-                            {"domain": "sensor"},
-                            {"domain": "light"}
-                        ],
-                        "device_class": "power"
-                    }
-                })
-            }),
+            data_schema=vol.Schema(schema_fields)
         )
 
     def is_matching(self, other: config_entries.ConfigFlow) -> bool:

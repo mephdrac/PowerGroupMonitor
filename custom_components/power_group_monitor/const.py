@@ -7,6 +7,8 @@ Attributes:
 
 DOMAIN = "power_group_monitor"
 
+CONF_GROUPS = "groups"
+
 DEVICE_INFO = {
     "manufacturer": "mephdrac",
     "model": "Power - Monitor",
