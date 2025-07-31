@@ -12,6 +12,8 @@
 - Gerätegruppen anlegen: Definiere Gruppen (z. B. Küche, Büro, Wärmeerzeuger), die beliebige Energie- oder Leistungs-Sensoren enthalten.
 - Aggregierte Verbrauchswerte: Erhalte Echtzeit-Daten zu Gesamtleistung (Watt) pro Gruppe
 - Kompatibilität: Funktioniert herstellerunabhängig, z. B. mit Shelly, Tasmota, Zigbee, Tuya und anderen Geräten.
+- Spitzenlast heute pro Gruppe.
+- Standby-Sensor
 
 ## ⚠️  Funktionen (geplant - noch nicht implementiert)
 
@@ -20,6 +22,15 @@
 - KPIs & Analysen: Standby-Anteile, Spitzenlasten, Betriebsdauer und weitere nützliche Kennzahlen.
 - Integration ins Energy Dashboard: Die gruppierten Sensoren lassen sich direkt im Home Assistant Energy Dashboard verwenden.
 
+---
+## Standby - Sensor
+
+Ein Sensor, der:
+
+den aktuellen Gesamtverbrauch der Gruppe beobachtet (PowerSensor),
+prüft, ob er unter einem konfigurierten Schwellenwert liegt,
+on bedeutet: alles im Standby,
+off bedeutet: mindestens ein Gerät verbraucht mehr als nur Standby.
 ---
 
 ## ⚠️ Limitationen:
