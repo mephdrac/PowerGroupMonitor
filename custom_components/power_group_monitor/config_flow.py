@@ -160,7 +160,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         {"domain": "sensor"},
                         {"domain": "light"}
                     ],
-                    "device_class": "power"
+                    "device_class": ["power", "energy"]
                 }
             })
 
