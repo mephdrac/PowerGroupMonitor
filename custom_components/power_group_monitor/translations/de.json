@@ -13,6 +13,7 @@
         "description": "Erstellen einer Gruppe, z.B. Küche oder Wohnzimmer",
         "data": {                    
           "group_name": "Name der Gruppe",
+          "standby": "Wert für Standby",
           "entities": "Entitäten der Gruppe"
         }
       },
@@ -27,6 +28,7 @@
         "description": "Richte eine Gruppe ein.",
         "data": {          
           "name": "Name des Gerätes",
+          "standby": "Wert für Standby",
           "entities": "Power-Entität"
         }
       }
@@ -39,6 +41,9 @@
       },
       "PowerPeakSensor":{
         "name": "{index} - Max. Leistung heute"
+      },
+      "PowerStandbySensor":{
+        "name": "{index} - Standby"
       }
     }    
   }
