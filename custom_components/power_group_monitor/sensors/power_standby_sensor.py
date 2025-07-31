@@ -1,11 +1,18 @@
+"""Sensor-Entity Anzeige vom Standby einer Gruppe in Home Assistant.
+
+Ein Sensor, der:
+
+den aktuellen Gesamtverbrauch der Gruppe beobachtet (PowerSensor),
+prüft, ob er unter einem konfigurierten Schwellenwert liegt,
+on bedeutet: alles im Standby,
+off bedeutet: mindestens ein Gerät verbraucht mehr als nur Standby.
+"""
 import logging
 
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorDeviceClass,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfPower
 from homeassistant.helpers.event import async_track_state_change_event
 
 from ..const import DOMAIN, DEVICE_INFO
@@ -38,8 +45,8 @@ class PowerStandbySensor(BinarySensorEntity):
         if power_entity_id is None:
             _LOGGER.warning("Power sensor entity_id is None during standby setup!")
             return
-        
-        self._power_entity_id = power_entity_id 
+
+        self._power_entity_id = power_entity_id
         self._unsub = async_track_state_change_event(
             self.hass, [power_entity_id], self._async_power_changed
         )
@@ -49,7 +56,7 @@ class PowerStandbySensor(BinarySensorEntity):
         if self._unsub:
             self._unsub()
 
-    async def _async_power_changed(self, event):
+    async def _async_power_changed(self, event): # pylint: disable=unused-argument
         await self._async_update()
 
     async def _async_update(self):

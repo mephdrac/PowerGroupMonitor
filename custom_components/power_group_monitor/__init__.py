@@ -88,7 +88,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
         if modified:
             hass.config_entries.async_update_entry(config_entry, data=data)
-    
+
     # if version < 2:
     #     _LOGGER.info("Migration MaxxiChargeConnect v1 → v2 gestartet")
     #     new_data = {**config_entry.data}
