@@ -9,11 +9,17 @@
         }
       },
        "add_group": {
-        "title": "Gruppe erstellen",
-        "description": "Einrichten der Gruppe, z.B. Küche oder Wohnzimmer",
+        "title": "Power-Group-Monitor",
+        "description": "Erstellen einer Gruppe, z.B. Küche oder Wohnzimmer",
         "data": {                    
           "group_name": "Name der Gruppe",
           "entities": "Entitäten der Gruppe"
+        }
+      },
+      "group_menu": {
+        "title": "Power-Group-Monitor",        
+        "data": {                    
+          "next_step": "Soll ein weitere Gruppe eingerichtet werden?"
         }
       },
       "reconfigure": {

@@ -25,7 +25,7 @@ from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
-from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, DOMAIN
+from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, CONF_NEXT_STEP, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         }
 
         if user_input is not None:
-            if user_input["next_step"] == "add_another":
+            if user_input[CONF_NEXT_STEP] == "add_another":
                 return await self.async_step_add_group()
             else:
                 return self.async_create_entry(
@@ -123,7 +123,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="group_menu",
             data_schema=vol.Schema({
-                vol.Required("next_step", default="add_another"): vol.In(options)
+                vol.Required(CONF_NEXT_STEP, default="add_another"): vol.In(options)
             })
         )
     
