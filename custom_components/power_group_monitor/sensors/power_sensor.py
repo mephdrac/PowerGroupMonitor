@@ -74,11 +74,19 @@ class PowerSensor(SensorEntity):
     async def _async_update_value(self):
         total_power = 0.0
         for entity_id in self._entities:
-            state = self.hass.states.get(entity_id)            
-            if state is None:                
+            state = self.hass.states.get(entity_id)
+            if state is None:
                 continue
-            try:
+
+            if state.attributes.get("unit_of_measurement") != UnitOfPower.WATT and state.attributes.get("unit_of_measurement") != UnitOfPower.KILO_WATT:
+                continue
+
+            try:                
                 value = float(state.state)
+
+                if state.attributes.get("unit_of_measurement") == UnitOfPower.KILO_WATT:
+                    value = value * 1000
+
                 total_power += value
             except ValueError:
                 continue
