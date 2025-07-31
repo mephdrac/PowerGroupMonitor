@@ -1,10 +1,7 @@
-"""Sensor-Entity zur Anzeige der aktuellen CCU-Leistung in Home Assistant.
+"""Sensor-Entity zur Anzeige der aktuellen Leistung einer Gruppe in Home Assistant.
 
-Dieses Modul definiert die `CcuPower`-Klasse, die einen Sensor zur Messung der Leistung
-(Pccu-Wert) einer CCU (Central Control Unit) bereitstellt. Die Daten werden per Webhook empfangen
-und regelmäßig aktualisiert.
-
-Die Klasse nutzt Home Assistants Dispatcher-System, um auf neue Sensordaten zu reagieren.
+Dieses Modul definiert die `PowerSensor`-Klasse, die einen Sensor zur Messung der Leistung
+einer Gruppe bereitstellt.
 """
 
 import logging
@@ -25,17 +22,16 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PowerSensor(SensorEntity):
-    """SensorEntity für die aktuelle CCU-Leistung (Pccu-Wert).
+    """SensorEntity für die aktuelle Leistung der Gruppe (Pccu-Wert).
 
-    Diese Entität zeigt die aktuell gemessene Leistung in Watt an,
-    wenn die empfangenen Daten als gültig eingestuft werden.
+    Diese Entität zeigt die aktuell gemessene Leistung in Watt an.    
     """
 
     _attr_translation_key = "PowerSensor"
     _attr_has_entity_name = True
 
     def __init__(self, entry: ConfigEntry, name, entities) -> None:
-        """Initialisiert den CCU-Leistungssensor.
+        """Initialisiert den Sensor.
 
         Args:
             entry (ConfigEntry): Die Konfigurationseintrag-Instanz für diese Integration.
@@ -66,13 +62,15 @@ class PowerSensor(SensorEntity):
         self._unsub = async_track_state_change_event(
             self.hass, self._entities, self._async_state_changed
         )
-        
-        await self._async_update_value()    
 
-    async def _async_state_changed(self, event):
-        # Wird aufgerufen, wenn sich eine Entity im Set ändert        
         await self._async_update_value()
 
+    # pylint: disable=unused-argument
+    async def _async_state_changed(self, event):
+        # Wird aufgerufen, wenn sich eine Entity im Set ändert
+        await self._async_update_value()
+
+    # pylint: disable=line-too-long
     async def _async_update_value(self):
         total_power = 0.0
         for entity_id in self._entities:
@@ -83,7 +81,7 @@ class PowerSensor(SensorEntity):
             if state.attributes.get("unit_of_measurement") != UnitOfPower.WATT and state.attributes.get("unit_of_measurement") != UnitOfPower.KILO_WATT:
                 continue
 
-            try:                
+            try:
                 value = float(state.state)
 
                 if state.attributes.get("unit_of_measurement") == UnitOfPower.KILO_WATT:

@@ -19,14 +19,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .sensors.power_sensor import PowerSensor
-from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES
+from .sensors.power_peak_sensor import PowerPeakSensor
 
-#from .const import DOMAIN
+from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statements
+async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statements, unused-argument
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ):
     """Setzt die Sensoren für einen ConfigEntry asynchron auf.
@@ -45,22 +45,14 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     data = entry.data
     groups = data.get("groups", [])
 
-    sensors = []
+    power_sensors = []
+    power_peak_sensors = []
+
     for group in groups:
-        group_name = group[CONF_GROUP_NAME]        
+        group_name = group[CONF_GROUP_NAME]
         entities = group[CONF_GROUP_ENTITIES]
-        sensors.append(PowerSensor(entry, group_name, entities))
+        power_sensors.append(PowerSensor(entry, group_name, entities))
+        power_peak_sensors.append(PowerPeakSensor(entry, group_name, entities))
 
-    async_add_entities(sensors, update_before_add=True)
-   
-    
-
-
-    # power_sensor = PowerSensor(entry)
-
-    # async_add_entities(
-    #     [
-    #        power_sensor,
-    #     ]
-    # )
-#    await asyncio.sleep(0)
+    async_add_entities(power_sensors, update_before_add=True)
+    async_add_entities(power_peak_sensors, update_before_add=True)
