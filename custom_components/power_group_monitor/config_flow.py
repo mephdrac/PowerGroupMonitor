@@ -50,6 +50,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         self._name = None
         self._entities = None
+        self._groups = []
 
     async def async_step_user(self, user_input=None):
         """Erster Schritt des Setup-Flows, der die Nutzereingaben abfragt.
@@ -63,33 +64,67 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """
         if user_input is not None:
             self._name = user_input[CONF_NAME]
-            self._entities = user_input[CONF_ENTITIES]
-
-            return self.async_create_entry(
-                title=self._name,
-                data={
-                    CONF_NAME: self._name,
-                    CONF_ENTITIES: self._entities
-                },
-            )
+            self._groups = []
+            return await self.async_step_add_group()
 
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_NAME): str,
-                vol.Required(CONF_ENTITIES): selector({
+            })
+        )
+
+    async def async_step_add_group(self, user_input=None):
+        if user_input is not None:
+            group_name = user_input["group_name"]
+            entities = user_input["entities"]
+            self._groups.append({
+                "group_name": group_name,
+                "entities": entities,
+            })
+            return await self.async_step_group_menu()
+
+        return self.async_show_form(
+            step_id="add_group",
+            data_schema=vol.Schema({
+                vol.Required("group_name"): str,
+                vol.Required("entities"): selector({
                     "entity": {
                         "multiple": True,
                         "filter": [
-                            {"domain": "switch"},
                             {"domain": "sensor"},
+                            {"domain": "switch"},
                             {"domain": "light"}
                         ],
-                        "device_class": "power"  # optional: filter auf power-sensoren
+                        "device_class": "power"
                     }
-                })
+                }),
             }),
-            last_step=True
+        )
+    
+    async def async_step_group_menu(self, user_input=None):
+        options = {
+            "add_another": "Weitere Gruppe hinzufügen",
+            "finish": "Fertig"
+        }
+
+        if user_input is not None:
+            if user_input["next_step"] == "add_another":
+                return await self.async_step_add_group()
+            else:
+                return self.async_create_entry(
+                    title=self._name,
+                    data={
+                        "name": self._name,
+                        "groups": self._groups,
+                    },
+                )
+
+        return self.async_show_form(
+            step_id="group_menu",
+            data_schema=vol.Schema({
+                vol.Required("next_step", default="add_another"): vol.In(options)
+            })
         )
     
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
