@@ -19,11 +19,8 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.config_entries import ConfigSubentryFlow
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.config_entries import SubentryFlowResult
-from homeassistant.core import callback
-from typing import Any
+from homeassistant.const import CONF_NAME, CONF_ENTITIES
+from homeassistant.helpers.selector import selector
 
 # from homeassistant.helpers.selector import selector
 
@@ -47,21 +44,12 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
     MINOR_VERSION = 1
-    reconfigure_supported = False  # <- Aktiviert den Reconfigure-Flow    
-    config_name = None
+    reconfigure_supported = True  # <- Aktiviert den Reconfigure-Flow
 
     def __init__(self):
-        self.config_name = None
-        self.groups = []
+        self._name = None
+        self._entities = None
 
-    @classmethod
-    @callback
-    def async_get_supported_subentry_types(
-        cls, config_entry: ConfigEntry
-    ) -> dict[str, type[ConfigSubentryFlow]]:
-        """Return subentries supported by this integration."""
-        return {"location": LocationSubentryFlowHandler}
-    
     async def async_step_user(self, user_input=None):
         """Erster Schritt des Setup-Flows, der die Nutzereingaben abfragt.
 
@@ -72,46 +60,39 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             FlowResult: Nächster Schritt oder Abschluss des Flows mit neuem Eintrag.
 
         """
-
         if user_input is not None:
-            self.config_name = user_input["name"]
+            self._name = user_input[CONF_NAME]
+            self._entities = user_input[CONF_ENTITIES]
+
             return self.async_create_entry(
-                title=self.config_name,
-                data=user_input,
+                title=self._name,
+                data={
+                    CONF_NAME: self._name,
+                    CONF_ENTITIES: self._entities
+                },
             )
 
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                vol.Required("name"): str
-            })
+                vol.Required(CONF_NAME): str,
+                vol.Required(CONF_ENTITIES): selector({
+                    "entity": {
+                        "multiple": True,
+                        "filter": [
+                            {"domain": "switch"},
+                            {"domain": "sensor"},
+                            {"domain": "light"}
+                        ],
+                        "device_class": "power"  # optional: filter auf power-sensoren
+                    }
+                })
+            }),
+            last_step=True
         )
 
     def is_matching(self, other: config_entries.ConfigFlow) -> bool:
         """Vergleicht, ob dieser Flow einem bestehenden Flow entspricht."""
         if not isinstance(other, PowerGroupMonitorConfigFlow):
             return False
-        return self.config_name == other.config_name
-
-
-class LocationSubentryFlowHandler(ConfigSubentryFlow):
-    """Handle subentry flow for adding and modifying a location."""
-
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> SubentryFlowResult:
-        """User flow to add a new location."""
-
-        if user_input is not None:
-            return self.async_create_entry(
-                title=user_input["location_name"],
-                data=user_input,
-            )
-
-        # Beispiel-Formular mit einem Feld für den Standortnamen
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema({
-                vol.Required("location_name"): str,
-            })
-        )
+        return self._name == other._name
