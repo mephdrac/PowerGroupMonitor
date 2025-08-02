@@ -56,7 +56,7 @@ class PowerStandbySensor(BinarySensorEntity):
         if self._unsub:
             self._unsub()
 
-    async def _async_power_changed(self, event): # pylint: disable=unused-argument
+    async def _async_power_changed(self, event):  # pylint: disable=unused-argument
         await self._async_update()
 
     async def _async_update(self):

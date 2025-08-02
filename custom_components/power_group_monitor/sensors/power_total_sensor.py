@@ -40,11 +40,10 @@ class PowerTotalSensor(SensorEntity):
         self._attr_suggested_display_precision = 2
         self._entry = entry
         self._groups = self._entry.data.get("groups", [])
-        
+
         self._entities = []
 
         for group in self._groups:
-            _LOGGER.warning("group: %s", group)
             entities = group[CONF_GROUP_ENTITIES]
             self._entities.extend(entities)
 

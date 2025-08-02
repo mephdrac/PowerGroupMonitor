@@ -47,6 +47,9 @@
       },
       "PowerTotalSensor":{
         "name": "Gesamt - Leistung"
+      },
+      "PowerPeakTotalSensor":{
+        "name": "Gesamt - Max. Leistung heute"
       }
     }    
   }
