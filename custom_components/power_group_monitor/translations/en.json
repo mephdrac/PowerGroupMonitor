@@ -40,10 +40,19 @@
         "name": "{index} - Power"
       },
       "PowerPeakSensor":{
-        "name": "{index} - Max. Power today"
+        "name": "{index} - max. power today"
       },
       "PowerStandbySensor":{
         "name": "{index} - Standby"
+      },
+       "PowerTotalSensor":{
+        "name": "Total - Power"
+      },
+      "PowerPeakTotalSensor":{
+        "name": "Total - max. power today"
+      },
+      "PowerStandbyTotalSensor":{
+        "name": "Total - Standby"
       }
     }    
   }

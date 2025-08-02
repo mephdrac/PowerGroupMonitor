@@ -1,9 +1,10 @@
-"""Sensor-Entity Anzeige vom Standby einer Gruppe in Home Assistant.
+"""Sensor-Entity Anzeige vom Standby über alle Gruppen in Home Assistant.
 
 Ein Sensor, der:
 
 den aktuellen Gesamtverbrauch der Gruppe beobachtet (PowerSensor),
-prüft, ob er unter einem konfigurierten Schwellenwert liegt,
+prüft, ob er unter einem konfigurierten Schwellenwert (addiert alle Gruppen schwellwerte)
+liegt,
 on bedeutet: alles im Standby,
 off bedeutet: mindestens ein Gerät verbraucht mehr als nur Standby.
 """
@@ -20,24 +21,22 @@ from ..const import DOMAIN, DEVICE_INFO
 _LOGGER = logging.getLogger(__name__)
 
 
-class PowerStandbySensor(BinarySensorEntity):
-    """Binärsensor zur Erkennung von Standby-Zuständen in einer Gruppe."""
+class PowerStandbyTotalSensor(BinarySensorEntity):
+    """Binärsensor zur Erkennung von Standby-Zuständen über alle Gruppen."""
 
-    _attr_translation_key = "PowerStandbySensor"
+    _attr_translation_key = "PowerStandbyTotalSensor"
     _attr_has_entity_name = True
     _attr_device_class = BinarySensorDeviceClass.POWER
     _attr_icon = "mdi:power-sleep"
 
-    def __init__(self, entry, group_name, power_sensor, standby_threshold):
+    def __init__(self, entry, power_sensor, standby_threshold):
         self._entry = entry
-        self._group_name = group_name
         self._power_sensor = power_sensor
         self._threshold = standby_threshold
         self._power_entity_id = None
         self._unsub = None
 
-        self._attr_unique_id = f"{entry.entry_id}_{group_name}_standby_sensor"
-        self._attr_translation_placeholders = {"index": group_name}
+        self._attr_unique_id = f"{entry.entry_id}_standby_total_sensor"
         self._attr_is_on = None
 
     async def async_added_to_hass(self):
