@@ -75,8 +75,7 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     # Add - Gesamt über alle Gruppen
     power_total_sensor = PowerTotalSensor(entry)
     power_peak_total_sensor = PowerPeakTotalSensor(entry)
-    power_standby_total_sensor = PowerStandbyTotalSensor(entry,power_total_sensor,total_standby_threshold)
-
+    power_standby_total_sensor = PowerStandbyTotalSensor(entry, power_total_sensor, total_standby_threshold)  # pylint: disable=line-too-long
 
     async_add_entities(
         [

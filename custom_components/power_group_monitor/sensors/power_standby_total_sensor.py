@@ -36,7 +36,7 @@ class PowerStandbyTotalSensor(BinarySensorEntity):
         self._power_entity_id = None
         self._unsub = None
 
-        self._attr_unique_id = f"{entry.entry_id}_standby_total_sensor"        
+        self._attr_unique_id = f"{entry.entry_id}_standby_total_sensor"
         self._attr_is_on = None
 
     async def async_added_to_hass(self):
