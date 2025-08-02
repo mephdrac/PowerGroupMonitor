@@ -1,0 +1,118 @@
+"""Sensor-Entity zur Anzeige der aktuellen Leistung über alle Gruppen in Home Assistant.
+
+Dieses Modul definiert die `PowerTotalSensor`-Klasse, die einen Sensor zur Messung der Leistung
+über alle Gruppe bereitstellt.
+"""
+
+import logging
+
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import UnitOfPower
+from homeassistant.helpers.event import async_track_state_change_event
+
+from ..const import DEVICE_INFO, DOMAIN, CONF_GROUP_ENTITIES  # noqa: TID252
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class PowerTotalSensor(SensorEntity):
+    """SensorEntity für die aktuelle Leistung der Gruppe.
+
+    Diese Entität zeigt die aktuell gemessene Leistung in Watt an.
+    """
+
+    _attr_translation_key = "PowerTotalSensor"
+    _attr_has_entity_name = True
+
+    def __init__(self, entry: ConfigEntry) -> None:
+        """Initialisiert den Sensor.
+
+        Args:
+            entry (ConfigEntry): Die Konfigurationseintrag-Instanz für diese Integration.
+
+        """
+        self._attr_suggested_display_precision = 2
+        self._entry = entry
+        self._groups = self._entry.data.get("groups", [])
+        
+        self._entities = []
+
+        for group in self._groups:
+            _LOGGER.warning("group: %s", group)
+            entities = group[CONF_GROUP_ENTITIES]
+            self._entities.extend(entities)
+
+        self._unsub = None
+
+        self._attr_unique_id = f"{entry.entry_id}_power_total_sensor"
+        self._attr_icon = "mdi:flash"
+        self._attr_native_value = None
+        self._attr_device_class = SensorDeviceClass.POWER
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_native_unit_of_measurement = UnitOfPower.WATT
+
+    async def async_added_to_hass(self):
+        """Wird beim Hinzufügen zur Home Assistant-Instanz aufgerufen.
+
+        Verbindet den Sensor mit dem Dispatcher-Signal zur Aktualisierung
+        der Messwerte per Webhook.
+        """
+        self._unsub = async_track_state_change_event(
+             self.hass, self._entities, self._async_state_changed
+        )
+        await self._async_update_value()
+
+    # pylint: disable=unused-argument
+    async def _async_state_changed(self, event):
+        # Wird aufgerufen, wenn sich eine Entity im Set ändert
+        await self._async_update_value()
+
+    # pylint: disable=line-too-long
+    async def _async_update_value(self):
+        total_power = 0.0
+        for entity_id in self._entities:
+            state = self.hass.states.get(entity_id)
+            if state is None:
+                continue
+
+            if state.attributes.get("unit_of_measurement") != UnitOfPower.WATT and state.attributes.get("unit_of_measurement") != UnitOfPower.KILO_WATT:
+                continue
+
+            try:
+                value = float(state.state)
+
+                if state.attributes.get("unit_of_measurement") == UnitOfPower.KILO_WATT:
+                    value = value * 1000
+
+                total_power += value
+            except ValueError:
+                continue
+        # self._state = round(total_power, 2)
+        self._attr_native_value = round(total_power, 2)
+        self.async_write_ha_state()
+
+    @property
+    def device_info(self):
+        """Liefert die Geräteinformationen für diese Sensor-Entity.
+
+        Returns:
+            dict: Ein Dictionary mit Informationen zur Identifikation
+                  des Geräts in Home Assistant, einschließlich:
+                  - identifiers: Eindeutige Identifikatoren (Domain und Entry ID)
+                  - name: Anzeigename des Geräts
+                  - manufacturer: Herstellername
+                  - model: Modellbezeichnung
+
+        """
+
+        return {
+            "identifiers": {(DOMAIN, self._entry.entry_id)},
+            "name": self._entry.title,
+            **DEVICE_INFO,
+        }

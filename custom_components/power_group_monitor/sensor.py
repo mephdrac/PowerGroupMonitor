@@ -21,6 +21,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .sensors.power_sensor import PowerSensor
 from .sensors.power_peak_sensor import PowerPeakSensor
 from .sensors.power_standby_sensor import PowerStandbySensor
+from .sensors.power_total_sensor import PowerTotalSensor
 
 from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
@@ -66,3 +67,15 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
         entity_list.extend([power_sensor, power_peak_sensor, standby_sensor])
 
     async_add_entities(entity_list, update_before_add=True)
+
+    # Add - Gesamt über alle Gruppen
+    power_total_sensor = PowerTotalSensor(entry)
+    async_add_entities(
+        [
+            power_total_sensor,
+        ]
+    )
+
+    
+    
+

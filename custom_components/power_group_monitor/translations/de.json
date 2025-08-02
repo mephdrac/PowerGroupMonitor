@@ -44,6 +44,9 @@
       },
       "PowerStandbySensor":{
         "name": "{index} - Standby"
+      },
+      "PowerTotalSensor":{
+        "name": "Gesamt - Leistung"
       }
     }    
   }
