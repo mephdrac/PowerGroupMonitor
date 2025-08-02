@@ -50,6 +50,9 @@
       },
       "PowerPeakTotalSensor":{
         "name": "Total - max. power today"
+      },
+      "PowerStandbyTotalSensor":{
+        "name": "Total - Standby"
       }
     }    
   }

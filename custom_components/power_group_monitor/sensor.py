@@ -23,6 +23,7 @@ from .sensors.power_peak_sensor import PowerPeakSensor
 from .sensors.power_standby_sensor import PowerStandbySensor
 from .sensors.power_total_sensor import PowerTotalSensor
 from .sensors.power_peak_total_sensor import PowerPeakTotalSensor
+from .sensors.power_standby_total_sensor import PowerStandbyTotalSensor
 
 from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
@@ -49,10 +50,12 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     groups = data.get("groups", [])
 
     entity_list = []
+    total_standby_threshold = float(0)
 
     for group in groups:
         group_name = group[CONF_GROUP_NAME]
         standby_threshold = group[CONF_GROUP_STANDBY]
+        total_standby_threshold += float(standby_threshold)
         entities = group[CONF_GROUP_ENTITIES]
 
         power_sensor = PowerSensor(entry, group_name, entities)
@@ -72,10 +75,13 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     # Add - Gesamt über alle Gruppen
     power_total_sensor = PowerTotalSensor(entry)
     power_peak_total_sensor = PowerPeakTotalSensor(entry)
+    power_standby_total_sensor = PowerStandbyTotalSensor(entry,power_total_sensor,total_standby_threshold)
+
 
     async_add_entities(
         [
             power_total_sensor,
-            power_peak_total_sensor
+            power_peak_total_sensor,
+            power_standby_total_sensor
         ]
     )
