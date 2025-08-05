@@ -1,7 +1,7 @@
 """Sensor für Gesamtenergie pro Gruppe.
 
 Dieses Modul definiert einen Sensor für Home Assistant,
-der die gesamte Energie gruppenübergreifent berechnet.
+der die gesamte Energie gruppenübergreifent für heute berechnet.
 Dazu werden einfach die Gruppensensoren addiert.
 """
 import logging
@@ -16,9 +16,9 @@ from ..const import DEVICE_INFO, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
-class EnergyTotalAllSensor(SensorEntity):
-    """Addiert alle Gruppen-Gesamtsummen"""
-    _attr_translation_key = "EnergyTotalAllSensor"
+class EnergyTodayAllSensor(SensorEntity):
+    """Addiert alle Gruppen-Gesamtsummen für heute"""
+    _attr_translation_key = "EnergyTodayAllSensor"
     _attr_has_entity_name = True
 
     def __init__(self, entry: ConfigEntry, obj_entities) -> None:
@@ -34,7 +34,7 @@ class EnergyTotalAllSensor(SensorEntity):
         self._entities = [entity.entity_id for entity in self._obj_entities]
         self._unsub = None
 
-        self._attr_unique_id = f"{entry.entry_id}_energy_total_all_sensor"
+        self._attr_unique_id = f"{entry.entry_id}_energy_today_all_sensor"
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR

@@ -27,6 +27,7 @@ from .sensors.energy_today_sensor import EnergyTodaySensor
 from .sensors.energy_total_sensor import EnergyTotalSensor
 
 from .sensors.energy_total_all_sensor import EnergyTotalAllSensor
+from .sensors.energy_today_all_sensor import EnergyTodayAllSensor
 
 from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
@@ -82,6 +83,7 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
                             energie_heute_gruppe, energie_gesamt_gruppe])
 
         energy_total_list.extend([energie_gesamt_gruppe])
+        energy_today_list.extend([energie_heute_gruppe])
 
     async_add_entities(entity_list, update_before_add=True)
 
@@ -93,12 +95,14 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     power_standby_total_sensor = PowerStandbyTotalSensor(entry, power_total_sensor, total_standby_threshold)
 
     all_energy_total = EnergyTotalAllSensor(entry, energy_total_list)
+    all_energy_today = EnergyTodayAllSensor(entry, energy_today_list)
 
     async_add_entities(
         [
             power_total_sensor,
             power_peak_total_sensor,
             power_standby_total_sensor,
-            all_energy_total
+            all_energy_total,
+            all_energy_today
         ]
     )
