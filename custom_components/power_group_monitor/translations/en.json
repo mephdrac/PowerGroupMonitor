@@ -59,6 +59,12 @@
       },
       "EnergyTotalSensor":{
         "name": "{index} - Energy total"
+      },
+      "EnergyTotalAllSensor":{
+        "name": "Total - Energy total"
+      },
+      "EnergyTodayAllSensor":{
+        "name": "Total - Energy today"
       }
     }    
   }
