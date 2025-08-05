@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 class PowerSensor(SensorEntity):
     """SensorEntity für die aktuelle Leistung der Gruppe (Pccu-Wert).
 
-    Diese Entität zeigt die aktuell gemessene Leistung in Watt an.    
+    Diese Entität zeigt die aktuell gemessene Leistung in Watt an.
     """
 
     _attr_translation_key = "PowerSensor"

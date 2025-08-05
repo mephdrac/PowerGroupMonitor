@@ -53,6 +53,18 @@
       },
       "PowerStandbyTotalSensor":{
         "name": "Total - Standby"
+      },
+      "EnergyTodaySensor":{
+        "name": "{index} - Energy today"
+      },
+      "EnergyTotalSensor":{
+        "name": "{index} - Energy total"
+      },
+      "EnergyTotalAllSensor":{
+        "name": "Total - Energy total"
+      },
+      "EnergyTodayAllSensor":{
+        "name": "Total - Energy today"
       }
     }    
   }
