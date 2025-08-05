@@ -11,7 +11,6 @@ Module-Level Variable:
     SENSOR_MANAGER (dict): Verwaltung der BatterySensorManager Instanzen, keyed nach entry_id.
 
 """
-
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -24,6 +23,8 @@ from .sensors.power_standby_sensor import PowerStandbySensor
 from .sensors.power_total_sensor import PowerTotalSensor
 from .sensors.power_peak_total_sensor import PowerPeakTotalSensor
 from .sensors.power_standby_total_sensor import PowerStandbyTotalSensor
+from .sensors.energy_today_sensor import EnergyTodaySensor
+from .sensors.energy_total_sensor import EnergyTotalSensor
 
 from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
@@ -68,14 +69,22 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
             standby_threshold=float(standby_threshold),  # konfigurierbarer Wert?
         )
 
-        entity_list.extend([power_sensor, power_peak_sensor, standby_sensor])
+        # Energie pro Gruppe heute
+        energie_heute_gruppe = EnergyTodaySensor(hass, entry, group_name, power_sensor)
+        # Energie pro Gruppe gesamt
+        energie_gesamt_gruppe = EnergyTotalSensor(hass, entry, group_name, power_sensor)
+
+        entity_list.extend([power_sensor, power_peak_sensor, standby_sensor,
+                            energie_heute_gruppe, energie_gesamt_gruppe])
 
     async_add_entities(entity_list, update_before_add=True)
 
     # Add - Gesamt über alle Gruppen
     power_total_sensor = PowerTotalSensor(entry)
     power_peak_total_sensor = PowerPeakTotalSensor(entry)
-    power_standby_total_sensor = PowerStandbyTotalSensor(entry, power_total_sensor, total_standby_threshold)  # pylint: disable=line-too-long
+
+    # pylint: disable=line-too-long
+    power_standby_total_sensor = PowerStandbyTotalSensor(entry, power_total_sensor, total_standby_threshold)
 
     async_add_entities(
         [
