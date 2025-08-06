@@ -23,11 +23,13 @@ from .sensors.power_standby_sensor import PowerStandbySensor
 from .sensors.power_total_sensor import PowerTotalSensor
 from .sensors.power_peak_total_sensor import PowerPeakTotalSensor
 from .sensors.power_standby_total_sensor import PowerStandbyTotalSensor
+
 from .sensors.energy_today_sensor import EnergyTodaySensor
 from .sensors.energy_total_sensor import EnergyTotalSensor
-
 from .sensors.energy_total_all_sensor import EnergyTotalAllSensor
 from .sensors.energy_today_all_sensor import EnergyTodayAllSensor
+
+from .sensors.average_power_sensor import AveragePowerSensor
 
 from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
 
@@ -56,6 +58,7 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     entity_list = []
     energy_total_list = []
     energy_today_list = []
+
     total_standby_threshold = float(0)
 
     for group in groups:
@@ -79,8 +82,11 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
         # Energie pro Gruppe gesamt
         energie_gesamt_gruppe = EnergyTotalSensor(hass, entry, group_name, power_sensor)
 
+        # Durchschnittswert
+        average_power = AveragePowerSensor(entry, group_name, power_sensor)
+
         entity_list.extend([power_sensor, power_peak_sensor, standby_sensor,
-                            energie_heute_gruppe, energie_gesamt_gruppe])
+                            energie_heute_gruppe, energie_gesamt_gruppe, average_power])
 
         energy_total_list.extend([energie_gesamt_gruppe])
         energy_today_list.extend([energie_heute_gruppe])
