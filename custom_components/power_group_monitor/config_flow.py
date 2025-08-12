@@ -16,53 +16,40 @@ aufgerufen, wenn der Nutzer die Integration hinzufügt oder neu konfiguriert.
 
 """
 import logging
-from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.selector import selector
 
-# from homeassistant.helpers.selector import selector
-
-from .const import CONF_GROUPS, CONF_GROUP_ENTITIES, CONF_GROUP_NAME, CONF_GROUP_STANDBY, \
-    CONF_NEXT_STEP, DOMAIN
+from .const import (
+    CONF_GROUPS,
+    CONF_GROUP_ENTITIES,
+    CONF_GROUP_NAME,
+    CONF_GROUP_STANDBY,
+    CONF_NEXT_STEP,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 
-# pylint: disable=W0237
 class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Konfigurations-Flow für die PowerGroupMonitor Integration.
-
-    Unterstützt den Standard-Setup-Flow sowie einen Reconfigure-Flow,
-    um bestehende Einträge zu ändern.
-
-    Attributes:
-        VERSION (int): Versionsnummer der Config-Flow-Datenstruktur.
-        reconfigure_supported (bool): Ob der Reconfigure-Flow aktiviert ist.
-
-    """
+    """Konfigurations-Flow für die PowerGroupMonitor Integration."""
 
     VERSION = 1
     MINOR_VERSION = 2
-    reconfigure_supported = True  # <- Aktiviert den Reconfigure-Flow
+    reconfigure_supported = True  # Aktiviert den Reconfigure-Flow
 
     def __init__(self):
         self._name = None
-        self._entities = None
         self._groups = []
+        self._reconfigure = False
+        self._edit_group_original_name = None  # Merkt die zu bearbeitende Gruppe
 
+    # ---------- Setup-Flow ----------
     async def async_step_user(self, user_input=None):
-        """Erster Schritt des Setup-Flows, der die Nutzereingaben abfragt.
-
-        Args:
-            user_input (dict | None): Vom Benutzer eingegebene Konfigurationsdaten.
-
-        Returns:
-            FlowResult: Nächster Schritt oder Abschluss des Flows mit neuem Eintrag.
-
-        """
+        """Erster Schritt des Setup-Flows."""
         if user_input is not None:
             self._name = user_input[CONF_NAME]
             self._groups = []
@@ -76,17 +63,17 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_add_group(self, user_input=None):
-        """Ein Gruppe hinzufügen"""
+        """Gruppe hinzufügen (wird für Setup und Reconfigure genutzt)."""
         if user_input is not None:
-            group_name = user_input[CONF_GROUP_NAME]
-            standby = user_input[CONF_GROUP_STANDBY]
-            entities = user_input[CONF_GROUP_ENTITIES]
             self._groups.append({
-                CONF_GROUP_NAME: group_name,
-                CONF_GROUP_STANDBY: standby,
-                CONF_GROUP_ENTITIES: entities,
+                CONF_GROUP_NAME: user_input[CONF_GROUP_NAME],
+                CONF_GROUP_STANDBY: user_input[CONF_GROUP_STANDBY],
+                CONF_GROUP_ENTITIES: user_input[CONF_GROUP_ENTITIES],
             })
-            return await self.async_step_group_menu()
+            if self._reconfigure:
+                return await self.async_step_reconfigure_menu()
+            else:
+                return await self.async_step_group_menu()
 
         return self.async_show_form(
             step_id="add_group",
@@ -101,14 +88,14 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             {"domain": "switch"},
                             {"domain": "light"}
                         ],
-                        "device_class": "power"
+                        "device_class": ["power", "energy"]
                     }
                 }),
             }),
         )
 
     async def async_step_group_menu(self, user_input=None):
-        """Fragemenü, ob es noch weitere Gruppen geben soll."""
+        """Fragemenü im Setup-Flow."""
         options = {
             "add_another": "Weitere Gruppe hinzufügen",
             "finish": "Fertig"
@@ -117,7 +104,6 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             if user_input[CONF_NEXT_STEP] == "add_another":
                 return await self.async_step_add_group()
-
             return self.async_create_entry(
                 title=self._name,
                 data={
@@ -125,6 +111,7 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_GROUPS: self._groups,
                 },
             )
+
         return self.async_show_form(
             step_id="group_menu",
             data_schema=vol.Schema({
@@ -132,49 +119,124 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             })
         )
 
-    # pylint: disable=line-too-long
-    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
-        """Flow-Schritt für die Neukonfiguration eines bestehenden Eintrags."""
+    # ---------- Reconfigure-Flow ----------
+    async def async_step_reconfigure(self, user_input=None):
+        """Startet den Reconfigure-Flow."""
         entry = self._get_reconfigure_entry()
-        current_groups = entry.data.get(CONF_GROUPS, [])
+        self._name = entry.data.get(CONF_NAME)
+        self._groups = entry.data.get(CONF_GROUPS, []).copy()
+        self._reconfigure = True
+        return await self.async_step_reconfigure_menu()
+
+    async def async_step_reconfigure_menu(self, user_input=None):
+        """Menü für den Reconfigure-Flow."""
+        options = {
+            "add": "Neue Gruppe hinzufügen",
+            "edit": "Bestehende Gruppe bearbeiten",
+            "delete": "Gruppe löschen",
+            "finish": "Fertigstellen"
+        }
 
         if user_input is not None:
-            # Update speichern
-            new_groups = []
-            for i in range(len(current_groups)):
-                name = user_input.get(f"{CONF_GROUP_NAME}_{i}")
-                standby = user_input.get(f"{CONF_GROUP_STANDBY}_{i}")
-                entities = user_input.get(f"group_{CONF_GROUP_ENTITIES}_{i}", [])
-                new_groups.append({CONF_GROUP_NAME: name, CONF_GROUP_STANDBY: standby, CONF_GROUP_ENTITIES: entities})
+            choice = user_input[CONF_NEXT_STEP]
+            if choice == "add":
+                return await self.async_step_add_group()
+            elif choice == "edit":
+                return await self.async_step_select_group_to_edit()
+            elif choice == "delete":
+                return await self.async_step_select_group_to_delete()
+            elif choice == "finish":
+                entry = self._get_reconfigure_entry()
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates={
+                        CONF_NAME: self._name,
+                        CONF_GROUPS: self._groups
+                    }
+                )
 
-            return self.async_update_reload_and_abort(
-                entry,
-                data_updates={CONF_GROUPS: new_groups}
-            )
-
-        # Dynamisches Schema aus bestehender Gruppenanzahl aufbauen
-        schema_fields = {}
-        for i, group in enumerate(current_groups):
-            schema_fields[vol.Required(f"{CONF_GROUP_NAME}_{i}", default=group[CONF_GROUP_NAME])] = str
-            schema_fields[vol.Required(f"{CONF_GROUP_STANDBY}_{i}", default=group[CONF_GROUP_STANDBY])] = str
-            schema_fields[vol.Required(
-                f"group_{CONF_GROUP_ENTITIES}_{i}",
-                default=group.get(CONF_GROUP_ENTITIES, []),
-            )] = selector({
-                "entity": {
-                    "multiple": True,
-                    "filter": [
-                        {"domain": "switch"},
-                        {"domain": "sensor"},
-                        {"domain": "light"}
-                    ],
-                    "device_class": ["power", "energy"]
-                }
-            })
+        # Neue Darstellung: Name + Entity-Anzahl
+        group_list_str = "\n".join(
+            [
+                f"{idx+1}. {g[CONF_GROUP_NAME]} ({len(g.get(CONF_GROUP_ENTITIES, []))} Entitäten)"
+                for idx, g in enumerate(self._groups)
+            ]
+        ) or "Keine Gruppen vorhanden"
 
         return self.async_show_form(
-            step_id="reconfigure",
-            data_schema=vol.Schema(schema_fields)
+            step_id="reconfigure_menu",
+            data_schema=vol.Schema({
+                vol.Required(CONF_NEXT_STEP, default="add"): vol.In(options)
+            }),
+            description_placeholders={"groups": group_list_str}
+        )
+
+
+    async def async_step_select_group_to_edit(self, user_input=None):
+        """Gruppe zum Bearbeiten auswählen."""
+        if user_input is not None:
+            self._edit_group_original_name = user_input["group_name"]  # speichern
+            return await self.async_step_edit_group()
+
+        choices = {g[CONF_GROUP_NAME]: g[CONF_GROUP_NAME] for g in self._groups}
+        return self.async_show_form(
+            step_id="select_group_to_edit",
+            data_schema=vol.Schema({
+                vol.Required("group_name"): vol.In(choices)
+            })
+        )
+
+    async def async_step_select_group_to_delete(self, user_input=None):
+        """Gruppe zum Löschen auswählen."""
+        if user_input is not None:
+            index = int(user_input["group_index"])
+            del self._groups[index]
+            return await self.async_step_reconfigure_menu()
+
+        choices = {str(i): g[CONF_GROUP_NAME] for i, g in enumerate(self._groups)}
+        return self.async_show_form(
+            step_id="select_group_to_delete",
+            data_schema=vol.Schema({
+                vol.Required("group_index"): vol.In(choices)
+            })
+        )
+
+    async def async_step_edit_group(self, user_input=None):
+        """Gruppe bearbeiten."""
+        # Suche die Gruppe mit dem gespeicherten Originalnamen
+        index = next((i for i, g in enumerate(self._groups)
+                      if g[CONF_GROUP_NAME] == self._edit_group_original_name), None)
+        if index is None:
+            _LOGGER.error("Gruppe '%s' nicht gefunden", self._edit_group_original_name)
+            return await self.async_step_reconfigure_menu()
+
+        if user_input is not None:
+            self._groups[index] = {
+                CONF_GROUP_NAME: user_input[CONF_GROUP_NAME],
+                CONF_GROUP_STANDBY: user_input[CONF_GROUP_STANDBY],
+                CONF_GROUP_ENTITIES: user_input[CONF_GROUP_ENTITIES],
+            }
+            self._edit_group_original_name = None  # zurücksetzen
+            return await self.async_step_reconfigure_menu()
+
+        group = self._groups[index]
+        return self.async_show_form(
+            step_id="edit_group",
+            data_schema=vol.Schema({
+                vol.Required(CONF_GROUP_NAME, default=group[CONF_GROUP_NAME]): str,
+                vol.Required(CONF_GROUP_STANDBY, default=group[CONF_GROUP_STANDBY]): str,
+                vol.Required(CONF_GROUP_ENTITIES, default=group.get(CONF_GROUP_ENTITIES, [])): selector({
+                    "entity": {
+                        "multiple": True,
+                        "filter": [
+                            {"domain": "switch"},
+                            {"domain": "sensor"},
+                            {"domain": "light"}
+                        ],
+                        "device_class": ["power", "energy"]
+                    }
+                })
+            })
         )
 
     def is_matching(self, other: config_entries.ConfigFlow) -> bool:
