@@ -1,4 +1,5 @@
-"""Konfigurations-Flow für die PowerGroupMonitor Integration.
+"""
+Konfigurations-Flow für die PowerGroupMonitor Integration.
 
 Dieses Modul implementiert den Konfigurations-Flow für die Home Assistant Integration
 "PowerGroupMonitor". Es ermöglicht die Einrichtung und Neukonfiguration eines
@@ -16,6 +17,7 @@ aufgerufen, wenn der Nutzer die Integration hinzufügt oder neu konfiguriert.
 
 """
 import logging
+import uuid
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -26,13 +28,13 @@ from .const import (
     CONF_GROUPS,
     CONF_GROUP_ENTITIES,
     CONF_GROUP_NAME,
+    CONF_GROUP_ID,
     CONF_GROUP_STANDBY,
     CONF_NEXT_STEP,
     DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
 
 class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Konfigurations-Flow für die PowerGroupMonitor Integration."""
@@ -45,11 +47,17 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._name = None
         self._groups = []
         self._reconfigure = False
-        self._edit_group_original_name = None  # Merkt die zu bearbeitende Gruppe
+        self._edit_group_id = None  # UUID der Gruppe, die editiert wird
+
+    # Hilfsmethode: Index einer Gruppe anhand der UUID finden
+    def _find_group_index_by_id(self, group_id):
+        for idx, group in enumerate(self._groups):
+            if group.get(CONF_GROUP_ID) == group_id:
+                return idx
+        return None
 
     # ---------- Setup-Flow ----------
     async def async_step_user(self, user_input=None):
-        """Erster Schritt des Setup-Flows."""
         if user_input is not None:
             self._name = user_input[CONF_NAME]
             self._groups = []
@@ -63,9 +71,10 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_add_group(self, user_input=None):
-        """Gruppe hinzufügen (wird für Setup und Reconfigure genutzt)."""
         if user_input is not None:
+            group_id = str(uuid.uuid4())  # UUID generieren
             self._groups.append({
+                CONF_GROUP_ID: group_id,
                 CONF_GROUP_NAME: user_input[CONF_GROUP_NAME],
                 CONF_GROUP_STANDBY: user_input[CONF_GROUP_STANDBY],
                 CONF_GROUP_ENTITIES: user_input[CONF_GROUP_ENTITIES],
@@ -95,7 +104,6 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_group_menu(self, user_input=None):
-        """Fragemenü im Setup-Flow."""
         options = {
             "add_another": "Weitere Gruppe hinzufügen",
             "finish": "Fertig"
@@ -121,7 +129,6 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     # ---------- Reconfigure-Flow ----------
     async def async_step_reconfigure(self, user_input=None):
-        """Startet den Reconfigure-Flow."""
         entry = self._get_reconfigure_entry()
         self._name = entry.data.get(CONF_NAME)
         self._groups = entry.data.get(CONF_GROUPS, []).copy()
@@ -129,7 +136,6 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_reconfigure_menu()
 
     async def async_step_reconfigure_menu(self, user_input=None):
-        """Menü für den Reconfigure-Flow."""
         options = {
             "add": "Neue Gruppe hinzufügen",
             "edit": "Bestehende Gruppe bearbeiten",
@@ -155,7 +161,6 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     }
                 )
 
-        # Neue Darstellung: Name + Entity-Anzahl
         group_list_str = "\n".join(
             [
                 f"{idx+1}. {g[CONF_GROUP_NAME]} ({len(g.get(CONF_GROUP_ENTITIES, []))} Entitäten)"
@@ -171,55 +176,66 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={"groups": group_list_str}
         )
 
-
     async def async_step_select_group_to_edit(self, user_input=None):
-        """Gruppe zum Bearbeiten auswählen."""
         if user_input is not None:
-            self._edit_group_original_name = user_input["group_name"]  # speichern
+            group_id = user_input["group_id"]
+            self._edit_group_id = group_id
             return await self.async_step_edit_group()
 
-        choices = {g[CONF_GROUP_NAME]: g[CONF_GROUP_NAME] for g in self._groups}
+        choices_list = [{"value": g[CONF_GROUP_ID], "label": g[CONF_GROUP_NAME]} for g in self._groups]
         return self.async_show_form(
             step_id="select_group_to_edit",
             data_schema=vol.Schema({
-                vol.Required("group_name"): vol.In(choices)
+                vol.Required("group_id"): selector({
+                    "select": {
+                        "options": choices_list
+                    }
+                })
             })
         )
 
     async def async_step_select_group_to_delete(self, user_input=None):
-        """Gruppe zum Löschen auswählen."""
         if user_input is not None:
-            index = int(user_input["group_index"])
-            del self._groups[index]
+            group_id = user_input["group_id"]
+            idx = self._find_group_index_by_id(group_id)
+            if idx is not None:
+                del self._groups[idx]
             return await self.async_step_reconfigure_menu()
 
-        choices = {str(i): g[CONF_GROUP_NAME] for i, g in enumerate(self._groups)}
+        choices_list = [{"value": g[CONF_GROUP_ID], "label": g[CONF_GROUP_NAME]} for g in self._groups]
         return self.async_show_form(
             step_id="select_group_to_delete",
             data_schema=vol.Schema({
-                vol.Required("group_index"): vol.In(choices)
+                vol.Required("group_id"): selector({
+                    "select": {
+                        "options": choices_list
+                    }
+                })
             })
         )
 
     async def async_step_edit_group(self, user_input=None):
-        """Gruppe bearbeiten."""
-        # Suche die Gruppe mit dem gespeicherten Originalnamen
-        index = next((i for i, g in enumerate(self._groups)
-                      if g[CONF_GROUP_NAME] == self._edit_group_original_name), None)
-        if index is None:
-            _LOGGER.error("Gruppe '%s' nicht gefunden", self._edit_group_original_name)
-            return await self.async_step_reconfigure_menu()
+        if self._edit_group_id is None:
+            # Kein Gruppen-ID gesetzt, zurück zum Auswahlmenü
+            return await self.async_step_select_group_to_edit()
+
+        idx = self._find_group_index_by_id(self._edit_group_id)
+        if idx is None:
+            # Gruppe nicht gefunden, zurück zum Auswahlmenü
+            self._edit_group_id = None
+            return await self.async_step_select_group_to_edit()
 
         if user_input is not None:
-            self._groups[index] = {
+            self._groups[idx] = {
+                CONF_GROUP_ID: self._edit_group_id,
                 CONF_GROUP_NAME: user_input[CONF_GROUP_NAME],
                 CONF_GROUP_STANDBY: user_input[CONF_GROUP_STANDBY],
                 CONF_GROUP_ENTITIES: user_input[CONF_GROUP_ENTITIES],
             }
-            self._edit_group_original_name = None  # zurücksetzen
+            self._edit_group_id = None
             return await self.async_step_reconfigure_menu()
 
-        group = self._groups[index]
+        group = self._groups[idx]
         return self.async_show_form(
             step_id="edit_group",
             data_schema=vol.Schema({
@@ -240,5 +256,4 @@ class PowerGroupMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     def is_matching(self, other: config_entries.ConfigFlow) -> bool:
-        """Vergleicht, ob dieser Flow einem bestehenden Flow entspricht."""
         return isinstance(other, PowerGroupMonitorConfigFlow)

@@ -29,7 +29,8 @@ from .sensors.energy_total_sensor import EnergyTotalSensor
 from .sensors.energy_total_all_sensor import EnergyTotalAllSensor
 from .sensors.energy_today_all_sensor import EnergyTodayAllSensor
 
-from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY
+from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY, \
+                    CONF_GROUP_ID
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,25 +60,27 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     total_standby_threshold = float(0)
 
     for group in groups:
+        group_id = group[CONF_GROUP_ID]
         group_name = group[CONF_GROUP_NAME]
         standby_threshold = group[CONF_GROUP_STANDBY]
         total_standby_threshold += float(standby_threshold)
         entities = group[CONF_GROUP_ENTITIES]
 
-        power_sensor = PowerSensor(entry, group_name, entities)
-        power_peak_sensor = PowerPeakSensor(entry, group_name, entities)
+        power_sensor = PowerSensor(entry, group_id, group_name, entities)
+        power_peak_sensor = PowerPeakSensor(entry, group_id, group_name, entities)
 
         standby_sensor = PowerStandbySensor(
             entry,
+            group_id,
             group_name,
             power_sensor,  # ← auf den dynamischen ID-Zugriff achten
             standby_threshold=float(standby_threshold),  # konfigurierbarer Wert?
         )
 
         # Energie pro Gruppe heute
-        energie_heute_gruppe = EnergyTodaySensor(hass, entry, group_name, power_sensor)
+        energie_heute_gruppe = EnergyTodaySensor(hass, entry, group_id, group_name, power_sensor)
         # Energie pro Gruppe gesamt
-        energie_gesamt_gruppe = EnergyTotalSensor(hass, entry, group_name, power_sensor)
+        energie_gesamt_gruppe = EnergyTotalSensor(hass, entry, group_id,  group_name, power_sensor)
 
         entity_list.extend([power_sensor, power_peak_sensor, standby_sensor,
                             energie_heute_gruppe, energie_gesamt_gruppe])
