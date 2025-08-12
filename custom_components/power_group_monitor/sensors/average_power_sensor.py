@@ -48,9 +48,12 @@ class AveragePowerSensor(SensorEntity):
             percentile=0
         )
 
+        # Unsichtbar im UI machen
+        self._statistics_sensor._attr_entity_registry_hidden_by = "integration"
+
         # Beide Entities registrieren – AveragePowerSensor ist bereits registriert
         if self.platform:  # platform ist nur in async_added_to_hass gesetzt
-            self.platform.async_add_entities([self._statistics_sensor])
+            await self.platform.async_add_entities([self._statistics_sensor])
 
         await super().async_added_to_hass()
 
