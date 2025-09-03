@@ -30,7 +30,7 @@ class PowerSensor(SensorEntity):
     _attr_translation_key = "PowerSensor"
     _attr_has_entity_name = True
 
-    def __init__(self, entry: ConfigEntry, name, entities) -> None:
+    def __init__(self, entry: ConfigEntry, group_id, group_name, entities) -> None:
         """Initialisiert den Sensor.
 
         Args:
@@ -40,13 +40,14 @@ class PowerSensor(SensorEntity):
         self._attr_suggested_display_precision = 2
         self._entry = entry
 
-        self._group_name = name
+        self._group_id = group_id
+        self._group_name = group_name
         self._entities = entities
         self._unsub = None
 
         self._attr_translation_placeholders = {"index": self._group_name}
 
-        self._attr_unique_id = f"{entry.entry_id}_{self._group_name}_power_sensor"
+        self._attr_unique_id = f"{entry.entry_id}_{self._group_id}_power_sensor"
         self._attr_icon = "mdi:flash"
         self._attr_native_value = None
         self._attr_device_class = SensorDeviceClass.POWER
