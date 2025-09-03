@@ -11,11 +11,12 @@ Funktionen:
 """
 
 import logging
+import uuid
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, CONF_GROUP_STANDBY, CONF_GROUPS
+from .const import DOMAIN, CONF_GROUP_STANDBY, CONF_GROUPS, CONF_GROUP_ID  # noqa: TID252
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,22 +87,57 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
                 group[CONF_GROUP_STANDBY] = "0"
                 modified = True
 
+        version = 1
+        minor_version = 2
+
         if modified:
-            hass.config_entries.async_update_entry(config_entry, data=data)
+            hass.config_entries.async_update_entry(
+                config_entry,
+                version=version,
+                data=data,
+                minor_version=minor_version,
+            )
+        else:
+            hass.config_entries.async_update_entry(
+                config_entry,
+                version=version,
+                minor_version=minor_version,
+            )
 
-    # if version < 2:
-    #     _LOGGER.info("Migration MaxxiChargeConnect v1 → v2 gestartet")
-    #     new_data = {**config_entry.data}
-    #     version = 2
-    #     hass.config_entries.async_update_entry(
-    #         config_entry, data=new_data, version=version
-    #     )
-    version = 1
-    minor_version = 1
-    hass.config_entries.async_update_entry(config_entry, version=version)
-    _LOGGER.info("Migration auf Version 1.1 abgeschlossen")
+    if version == 1 and minor_version == 2:
+        _LOGGER.warning("Migration PowerGroupMonitor v1.1 → v1.2 gestartet")
+        try:
 
-    return True
+            groups = config_entry.data.get(CONF_GROUPS, [])
+            changed = False
+            for g in groups:
+                if CONF_GROUP_ID not in g:
+                    g[CONF_GROUP_ID] = str(uuid.uuid4())
+                    changed = True
+
+            version = 1
+            minor_version = 2
+
+            if changed:
+                hass.config_entries.async_update_entry(
+                    config_entry,
+                    version=version,
+                    minor_version=minor_version,
+                    data=config_entry.data
+                    )
+            else:
+                hass.config_entries.async_update_entry(
+                    config_entry,
+                    version=version,
+                    minor_version=minor_version
+                    )
+
+            _LOGGER.info("Migration auf Version 1.2 abgeschlossen")
+        except Exception as e:  # pylint: disable=broad-except
+            _LOGGER.exception("Fehler bei Migration auf Version 1.2: %s", e)
+            return False
+
+    return version == 1 and minor_version == 2
 
 # async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
 #     # pylint: disable=unused-argument

@@ -28,6 +28,7 @@ class PowerStandbySensor(BinarySensorEntity):
     _attr_device_class = BinarySensorDeviceClass.POWER
     _attr_icon = "mdi:power-sleep"
 
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(self, entry, group_id, group_name, power_sensor, standby_threshold):
         self._entry = entry
         self._group_id = group_id

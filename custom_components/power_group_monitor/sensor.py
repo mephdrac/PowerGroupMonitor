@@ -11,6 +11,7 @@ Module-Level Variable:
     SENSOR_MANAGER (dict): Verwaltung der BatterySensorManager Instanzen, keyed nach entry_id.
 
 """
+
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -29,8 +30,13 @@ from .sensors.energy_total_sensor import EnergyTotalSensor
 from .sensors.energy_total_all_sensor import EnergyTotalAllSensor
 from .sensors.energy_today_all_sensor import EnergyTodayAllSensor
 
-from .const import CONF_GROUP_NAME, CONF_GROUP_ENTITIES, CONF_GROUP_STANDBY, \
-                    CONF_GROUP_ID
+from .const import (
+    CONF_GROUP_NAME,
+    CONF_GROUP_ENTITIES,
+    CONF_GROUP_STANDBY,
+    CONF_GROUP_ID,
+    CONF_GROUPS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,9 +56,19 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
         None
 
     """
-
-    data = entry.data
-    groups = data.get("groups", [])
+    # groups = data.get(CONF_GROUPS, [])
+    _LOGGER.warning(
+        "PowerGroupMonitor: entry_id=%s data=%s", entry.entry_id, entry.data
+    )
+    groups = entry.data.get(CONF_GROUPS, []) or []
+    for i, g in enumerate(groups):
+        _LOGGER.warning(
+            "PowerGroupMonitor: group[%s] type=%s keys=%s value=%s",
+            i,
+            type(g),
+            list(g.keys()) if isinstance(g, dict) else None,
+            g,
+        )
 
     entity_list = []
     energy_total_list = []
@@ -78,12 +94,23 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
         )
 
         # Energie pro Gruppe heute
-        energie_heute_gruppe = EnergyTodaySensor(hass, entry, group_id, group_name, power_sensor)
+        energie_heute_gruppe = EnergyTodaySensor(
+            hass, entry, group_id, group_name, power_sensor
+        )
         # Energie pro Gruppe gesamt
-        energie_gesamt_gruppe = EnergyTotalSensor(hass, entry, group_id,  group_name, power_sensor)
+        energie_gesamt_gruppe = EnergyTotalSensor(
+            hass, entry, group_id, group_name, power_sensor
+        )
 
-        entity_list.extend([power_sensor, power_peak_sensor, standby_sensor,
-                            energie_heute_gruppe, energie_gesamt_gruppe])
+        entity_list.extend(
+            [
+                power_sensor,
+                power_peak_sensor,
+                standby_sensor,
+                energie_heute_gruppe,
+                energie_gesamt_gruppe,
+            ]
+        )
 
         energy_total_list.extend([energie_gesamt_gruppe])
         energy_today_list.extend([energie_heute_gruppe])
@@ -95,7 +122,9 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     power_peak_total_sensor = PowerPeakTotalSensor(entry)
 
     # pylint: disable=line-too-long
-    power_standby_total_sensor = PowerStandbyTotalSensor(entry, power_total_sensor, total_standby_threshold)
+    power_standby_total_sensor = PowerStandbyTotalSensor(
+        entry, power_total_sensor, total_standby_threshold
+    )
 
     all_energy_total = EnergyTotalAllSensor(entry, energy_total_list)
     all_energy_today = EnergyTodayAllSensor(entry, energy_today_list)
@@ -106,6 +135,6 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
             power_peak_total_sensor,
             power_standby_total_sensor,
             all_energy_total,
-            all_energy_today
+            all_energy_today,
         ]
     )

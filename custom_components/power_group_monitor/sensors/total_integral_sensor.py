@@ -34,7 +34,7 @@ from ..tools import clean_title
 _LOGGER = logging.getLogger(__name__)
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes, too-many-instance-attributes, too-many-instance-attributes
 class TotalIntegralSensor(IntegrationSensor):
     """Sensorentität zur Anzeige der gesamten Energie (kWh).
 
@@ -55,7 +55,7 @@ class TotalIntegralSensor(IntegrationSensor):
 
     _attr_has_entity_name = True
 
-    # pylint: disable=super-init-not-called
+    # pylint: disable=super-init-not-called, too-many-arguments, too-many-locals, line-too-long, too-many-instance-attributes, too-many-instance-attributes, too-many-positional-arguments
     def __init__(self, hass: HomeAssistant, entry, group_id, group_name: str, source: PowerSensor) -> None:
         """Initialisiert die Sensorentität für die gesamte Energie.
 

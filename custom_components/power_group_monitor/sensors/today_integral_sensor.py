@@ -56,7 +56,7 @@ class TodayIntegralSensor(IntegrationSensor):
 
     _attr_has_entity_name = True
 
-    # pylint: disable=super-init-not-called
+    # pylint: disable=super-init-not-called, too-many-arguments, too-many-locals, line-too-long, too-many-positional-arguments
     def __init__(self, hass: HomeAssistant, entry, group_id: str, group_name: str, source: PowerSensor) -> None:
         """Initialisiert die Sensorentität für den gesamten Tag.
 
