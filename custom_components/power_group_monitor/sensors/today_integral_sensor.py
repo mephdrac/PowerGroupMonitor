@@ -56,8 +56,8 @@ class TodayIntegralSensor(IntegrationSensor):
 
     _attr_has_entity_name = True
 
-    # pylint: disable=super-init-not-called
-    def __init__(self, hass: HomeAssistant, entry, group_name: str, source: PowerSensor) -> None:
+    # pylint: disable=super-init-not-called, too-many-arguments, too-many-locals, line-too-long, too-many-positional-arguments
+    def __init__(self, hass: HomeAssistant, entry, group_id: str, group_name: str, source: PowerSensor) -> None:
         """Initialisiert die Sensorentität für den gesamten Tag.
 
         Args:
@@ -68,11 +68,12 @@ class TodayIntegralSensor(IntegrationSensor):
         """
 
         self.hass = hass
+        self._group_id = group_id
         self._group_name = group_name
         self._attr_translation_key = self.__class__.__name__
         self._attr_translation_placeholders = {"index": self._group_name}
         self._attr_unique_id = (
-            f"{entry.entry_id}_{self._group_name}_{clean_title(self.__class__.__name__)}"
+            f"{entry.entry_id}_{self._group_id}_{clean_title(self.__class__.__name__)}"
         )
         self._source = source
         self._source_entity = source.entity_id

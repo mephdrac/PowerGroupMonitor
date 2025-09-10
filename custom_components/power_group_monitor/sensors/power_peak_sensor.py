@@ -26,14 +26,15 @@ class PowerPeakSensor(SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:flash-alert"
 
-    def __init__(self, entry: ConfigEntry, group_name: str, entities: list[str]):
+    def __init__(self, entry: ConfigEntry, group_id, group_name: str, entities: list[str]):
         self._entry = entry
+        self._group_id = group_id
         self._group_name = group_name
         self._entities = entities
         self._unsub = None
         self._reset_job = None
 
-        self._attr_unique_id = f"{entry.entry_id}_{group_name}_peak_power_sensor"
+        self._attr_unique_id = f"{entry.entry_id}_{group_id}_peak_power_sensor"
         self._attr_translation_placeholders = {"index": group_name}
         self._attr_native_value = 0.0
 

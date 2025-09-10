@@ -52,13 +52,13 @@ class EnergyTotalAllSensor(SensorEntity):
                 return
 
         self._entities = [entity.entity_id for entity in self._obj_entities]
-        self._unsub = async_track_state_change_event(self.hass, self._entities, 
+        self._unsub = async_track_state_change_event(self.hass, self._entities,
                                                      self._async_state_changed)
 
         await self._async_update_value()
 
     # pylint: disable=unused-argument
-    async def _async_state_changed(self, event):        
+    async def _async_state_changed(self, event):
         # Wird aufgerufen, wenn sich eine Entity im Set ändert
         await self._async_update_value()
 
@@ -73,7 +73,7 @@ class EnergyTotalAllSensor(SensorEntity):
 
                 total += value
             except ValueError:
-                continue        
+                continue
         self._attr_native_value = round(total, 3)
         self.async_write_ha_state()
 
@@ -96,4 +96,3 @@ class EnergyTotalAllSensor(SensorEntity):
             "name": self._entry.title,
             **DEVICE_INFO,
         }
-
