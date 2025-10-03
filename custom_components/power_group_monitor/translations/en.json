@@ -65,6 +65,9 @@
       },
       "EnergyTodayAllSensor":{
         "name": "Total - Energy today"
+      },
+      "AveragePowerSensor":{
+        "name": "{index} - 15 Min. Average"
       }
     }    
   }
