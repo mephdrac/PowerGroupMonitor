@@ -1,15 +1,16 @@
+"""Modul definiert einen 15 Minuten Durchschnittsleistungssensor für Home Assistant.
+Dazu wird die History der letzten 15 Minuten ausgewertet."""
 import logging
+from datetime import timedelta
+
 from homeassistant.components import recorder
-from datetime import timedelta, datetime, UTC
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import UnitOfPower
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.components.recorder import history
+from homeassistant.const import UnitOfPower
 from homeassistant.util import dt as dt_util
 
-
-from .power_sensor import PowerSensor
 from ..const import DEVICE_INFO, DOMAIN  # noqa: TID252
+from .power_sensor import PowerSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class AveragePowerSensor(SensorEntity):
         self._entry = entry
         self._group_name = group_name
         self._attr_translation_placeholders = {"index": self._group_name}
-        self._source = source        
+        self._source = source
         self._attr_unique_id = f"{entry.entry_id}_{self._group_name}_avg_power"
         self._attr_native_unit_of_measurement = UnitOfPower.WATT
         self._attr_suggested_display_precision = 3
@@ -42,6 +43,7 @@ class AveragePowerSensor(SensorEntity):
         await super().async_added_to_hass()
 
     async def async_update(self):
+        """Wird aufgerufen, wenn die Entity aktualisiert wird."""
         self._attr_native_value = await self.async_calculate_average()
 
     async def async_calculate_average(self):
