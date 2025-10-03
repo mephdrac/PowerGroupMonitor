@@ -31,6 +31,7 @@ from .sensors.energy_total_all_sensor import EnergyTotalAllSensor
 from .sensors.energy_today_all_sensor import EnergyTodayAllSensor
 
 from .sensors.average_power_sensor import AveragePowerSensor
+from .sensors.average_power_all_sensor import AveragePowerAllSensor
 
 from .const import (
     CONF_GROUP_NAME,
@@ -75,6 +76,7 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
     entity_list = []
     energy_total_list = []
     energy_today_list = []
+    power_average_list = []
 
     total_standby_threshold = float(0)
 
@@ -96,6 +98,9 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
             standby_threshold=float(standby_threshold),  # konfigurierbarer Wert?
         )
 
+        # Durchschnittswert
+        average_power = AveragePowerSensor(entry, group_name, power_sensor)
+
         # Energie pro Gruppe heute
         energie_heute_gruppe = EnergyTodaySensor(
             hass, entry, group_id, group_name, power_sensor
@@ -105,22 +110,20 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
             hass, entry, group_id, group_name, power_sensor
         )
 
-        # Durchschnittswert
-        average_power = AveragePowerSensor(entry, group_name, power_sensor)
-
         entity_list.extend(
             [
                 power_sensor,
                 power_peak_sensor,
                 standby_sensor,
                 energie_heute_gruppe,
-                energie_gesamt_gruppe, 
+                energie_gesamt_gruppe,
                 average_power,
             ]
         )
 
         energy_total_list.extend([energie_gesamt_gruppe])
         energy_today_list.extend([energie_heute_gruppe])
+        power_average_list.extend([average_power])
 
     async_add_entities(entity_list, update_before_add=True)
 
@@ -135,6 +138,7 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
 
     all_energy_total = EnergyTotalAllSensor(entry, energy_total_list)
     all_energy_today = EnergyTodayAllSensor(entry, energy_today_list)
+    all_power_average = AveragePowerAllSensor(entry, power_average_list)
 
     async_add_entities(
         [
@@ -143,5 +147,6 @@ async def async_setup_entry(  # pylint: disable=too-many-locals, too-many-statem
             power_standby_total_sensor,
             all_energy_total,
             all_energy_today,
+            all_power_average
         ]
     )

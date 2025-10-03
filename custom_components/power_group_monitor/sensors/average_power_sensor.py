@@ -1,13 +1,18 @@
 import logging
-from datetime import timedelta
-from homeassistant.components.statistics.sensor import StatisticsSensor
+from homeassistant.components import recorder
+from datetime import timedelta, datetime, UTC
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import UnitOfPower
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.recorder import history
+from homeassistant.util import dt as dt_util
+
+
 from .power_sensor import PowerSensor
 from ..const import DEVICE_INFO, DOMAIN  # noqa: TID252
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class AveragePowerSensor(SensorEntity):
     """Durchschnittliche Leistung über 15 Minuten."""
@@ -22,7 +27,7 @@ class AveragePowerSensor(SensorEntity):
         self._source = source        
         self._attr_unique_id = f"{entry.entry_id}_{self._group_name}_avg_power"
         self._attr_native_unit_of_measurement = UnitOfPower.WATT
-        
+        self._attr_suggested_display_precision = 3
         self._source_entity_id = source.entity_id
         self._statistics_sensor = None
 
@@ -34,58 +39,38 @@ class AveragePowerSensor(SensorEntity):
             _LOGGER.warning("Sensor entity_id is None during avg setup!")
             return
 
-        # Statistik-Sensor anlegen
-        self._statistics_sensor = StatisticsSensor(
-            hass=self.hass,
-            name=f"{self.name} - avg",
-            unique_id=f"{self._entry.entry_id}_{self._group_name}_avg_power_statistic",
-            state_characteristic="mean",
-            source_entity_id=source_entity_id,
-            samples_max_buffer_size=None,
-            samples_max_age=timedelta(minutes=15),
-            samples_keep_last=True,
-            precision=2,
-            percentile=0
-        )
-
-        # Unsichtbar im UI machen
-        self._statistics_sensor._attr_entity_registry_hidden_by = "integration"
-
-        # Beide Entities registrieren – AveragePowerSensor ist bereits registriert
-        if self.platform:  # platform ist nur in async_added_to_hass gesetzt
-            await self.platform.async_add_entities([self._statistics_sensor])
-
         await super().async_added_to_hass()
 
     async def async_update(self):
-        """Wird periodisch aufgerufen, um den Durchschnittswert zu aktualisieren."""
-        value = None
+        self._attr_native_value = await self.async_calculate_average()
 
-        # 1️⃣ Statistik-Sensor State lesen
-        if self._statistics_sensor and self._statistics_sensor.entity_id:
-            stats_state = self.hass.states.get(self._statistics_sensor.entity_id)
-            if stats_state and stats_state.state not in (None, "unknown", "unavailable"):
-                try:
-                    value = float(stats_state.state)
-                except ValueError:
-                    _LOGGER.debug(
-                        "Konnte Statistikwert nicht in float umwandeln: %s",
-                        stats_state.state
-                    )
+    async def async_calculate_average(self):
+        """Berechne den Durchschnitt der letzten 15 Minuten aus der History."""
+        now = dt_util.utcnow()
+        start = now - timedelta(minutes=15)
 
-        # # 2️⃣ Falls kein Statistikwert → Fallback: PowerSensor
-        # if value is None:
-        #     source_state = self.hass.states.get(self._source.entity_id)
-        #     if source_state and source_state.state not in (None, "unknown", "unavailable"):
-        #         try:
-        #             value = float(source_state.state)
-        #         except ValueError:
-        #             _LOGGER.debug(
-        #                 "Konnte PowerSensor-Wert nicht in float umwandeln: %s",
-        #                 source_state.state
-        #             )
+        def _fetch():
+            return recorder.history.state_changes_during_period(
+                self.hass,
+                start_time=start,
+                end_time=now,
+                entity_id=self._source.entity_id,
+                no_attributes=True,
+            )
 
-        self._attr_native_value = value
+        instance = recorder.get_instance(self.hass)
+        states = await instance.async_add_executor_job(_fetch)
+
+        values = []
+        for state in states.get(self._source.entity_id, []):
+            try:
+                values.append(float(state.state))
+            except (ValueError, TypeError):
+                continue
+
+        if values:
+            return sum(values) / len(values)
+        return None
 
     @property
     def device_info(self):
