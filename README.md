@@ -14,16 +14,15 @@
 - Kompatibilität: Funktioniert herstellerunabhängig, z. B. mit Shelly, Tasmota, Zigbee, Tuya und anderen Geräten.
 - Spitzenlast heute pro Gruppe.
 - Standby-Sensor
-
-## ⚠️  Funktionen (geplant - noch nicht implementiert)
-
 - Aggregierte Verbrauchswerte: Erhalte den Energieverbrauch (kWh) pro Gruppe.
-- Tägliche und monatliche Statistik: Überblick über Verbrauchshistorie direkt in Home Assistant.
-- KPIs & Analysen: Standby-Anteile, Spitzenlasten, Betriebsdauer und weitere nützliche Kennzahlen.
 - Integration ins Energy Dashboard: Die gruppierten Sensoren lassen sich direkt im Home Assistant Energy Dashboard verwenden.
 
+## ⚠️  Funktionen (geplant - noch nicht implementiert)
+- Tägliche und monatliche Statistik: Überblick über Verbrauchshistorie direkt in Home Assistant.
+- KPIs & Analysen: Standby-Anteile, Spitzenlasten, Betriebsdauer und weitere nützliche Kennzahlen.
+
 ---
-## Standby - Sensor
+## Beschreibung: Standby - Sensor
 
 Ein Sensor, der:
 
