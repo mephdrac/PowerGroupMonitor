@@ -2,6 +2,29 @@
 
 # PowerGroupMonitor
 
+[![GitHub Release][releases-shield]][releases]
+[![hacs][hacsbadge]][hacs]
+[![License][license-shield]][license]
+[![Issues][issue-shield]][issues]
+[![GitHub Activity][commits-shield]][commits]
+[![HacsStats][stats-shield]][ha-analytics]
+
+[Maxxisun-CCUs]: https://maxxisun.de/
+[maxxisun-ha]: https://github.com/mephdrac/PowerGroupMonitor
+[commits-shield]: https://img.shields.io/github/commit-activity/y/mephdrac/PowerGroupMonitor
+[commits]: https://github.com/mephdrac/PowerGroupMonitor/commits/main
+[hacs]: https://github.com/hacs/integration
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg
+[license-shield]: https://img.shields.io/github/license/mephdrac/PowerGroupMonitor.svg
+[issue-shield]: https://img.shields.io/github/issues/mephdrac/PowerGroupMonitor.svg
+[releases-shield]: https://img.shields.io/github/release/mephdrac/PowerGroupMonitor.svg
+[releases]: https://github.com/mephdrac/PowerGroupMonitor/releases
+[stats-shield]: https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.PowerGroupMonitor.total
+[ha-analytics]: https://analytics.home-assistant.io/
+[issues]: https://github.com/mephdrac/PowerGroupMonitor/issues
+[license]: https://github.com/mephdrac/PowerGroupMonitor/blob/main/LICENSE
+
+
 
 **PowerGroupMonitor** ist eine Home Assistant Integration zur intelligenten Überwachung und Auswertung von Energie- und Leistungsdaten über mehrere Geräte hinweg. Mit PowerGroupMonitor kannst du Geräte in logische Gruppen zusammenfassen und deren Gesamtverbrauch sowie wichtige Kennzahlen (KPIs) komfortabel überwachen.
 
